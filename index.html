@@ -1,11 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-<title>Page Title</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Escala de Trabalho - Mês Completo</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 8px 4px;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+  .weekend {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  .workday {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  .person-name {
+    font-weight: bold;
+  }
+
+  @media (max-width: 600px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+      width: 100%;
+    }
+
+    thead tr {
+      display: none;
+    }
+
+    tbody tr {
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+    }
+
+    tbody tr td {
+      border: none;
+      padding: 6px 10px;
+      position: relative;
+      text-align: left;
+      background: none;
+      color: inherit;
+    }
+
+    tbody tr td div:first-child {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 8px;
+    }
+
+    .person-name {
+      display: inline-block;
+      min-width: 80px;
+    }
+  }
+</style>
 </head>
 <body>
 
+<h1>Escala de Trabalho - Maio 2025</h1>
 
+<table>
+  <thead>
+    <tr>
+      <th>Domingo</th>
+      <th>Segunda</th>
+      <th>Terça</th>
+      <th>Quarta</th>
+      <th>Quinta</th>
+      <th>Sexta</th>
+      <th>Sábado</th>
+    </tr>
+  </thead>
+  <tbody id="calendar-body">
+  </tbody>
+</table>
+
+<script>
+  const year = 2025;
+  const month = 4; // Maio (0-based)
+  const people = ['Pessoa 1', 'Pessoa 2'];
+
+  // Array com nomes dos dias da semana para mostrar no mobile
+  const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  function buildCalendar(year, month) {
+    const calendarBody = document.getElementById('calendar-body');
+    calendarBody.innerHTML = '';
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    let date = 1;
+
+    while (date <= lastDay.getDate()) {
+      const row = document.createElement('tr');
+
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        const cell = document.createElement('td');
+
+        if (date > lastDay.getDate()) {
+          cell.innerHTML = '';
+          row.appendChild(cell);
+          continue;
+        }
+
+        if (date === 1 && dayOfWeek < firstDay.getDay()) {
+          cell.innerHTML = '';
+          row.appendChild(cell);
+          continue;
+        }
+
+        const currentDate = new Date(year, month, date);
+        const currentWeekDay = currentDate.getDay();
+
+        // Formata o título do dia no mobile: "Segunda, 12"
+        const dayTitle = `${weekDayNames[currentWeekDay]}, ${date}`;
+
+        // No desktop só o número, no mobile o dia da semana + número (via CSS escondemos cabeçalho)
+        let cellContent = `<div class="day-title">${dayTitle}</div>`;
+
+        people.forEach(person => {
+          const isWeekend = (currentWeekDay === 0 || currentWeekDay === 6);
+          const status = isWeekend ? 'Folga' : 'Trabalho';
+          const className = isWeekend ? 'weekend' : 'workday';
+          cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
+        });
+
+        cell.innerHTML = cellContent;
+        row.appendChild(cell);
+        date++;
+      }
+      calendarBody.appendChild(row);
+    }
+  }
+
+  buildCalendar(year, month);
+</script>
 
 </body>
 </html>
