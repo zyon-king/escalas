@@ -134,6 +134,7 @@
     <option value="">Carregando...</option>
   </select>
   <button id="add-month-btn">Adicionar Mês Seguinte</button>
+  <button id="add-month-btn">Marcar Folgas</button>
 </div>
 
 <div id="loading" class="loading" style="display: none;">Carregando dados...</div>
@@ -156,252 +157,357 @@
 </table>
 
 <script>
-  const gistId = 'b996dc535ebcc23c8b45f8979b4d86e0';
-  const filename = 'meses_escala.json';
-  const token = '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';
-  
-  const people = ['Pessoa 1', 'Pessoa 2'];
-  const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-  let currentMonth = null;
-  let currentYear = null;
-  let months = [];
+const gistId = 'b996dc535ebcc23c8b45f8979b4d86e0';
+const filename = 'meses_escala.json';
+const token = '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';
 
-  function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'block' : 'none';
-  }
+const people = ['Pessoa 1', 'Pessoa 2'];
+const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+let currentMonth = null;
+let currentYear = null;
+let months = [];
 
-  function showError(message) {
-    const errorDiv = document.getElementById('error');
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    setTimeout(() => {
-      errorDiv.style.display = 'none';
-    }, 5000);
-  }
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+}
 
-  function buildCalendar(year, month) {
-    const calendarBody = document.getElementById('calendar-body');
-    calendarBody.innerHTML = '';
+function showError(message) {
+  const errorDiv = document.getElementById('error');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+  setTimeout(() => {
+    errorDiv.style.display = 'none';
+  }, 5000);
+}
 
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    let date = 1;
-
-    while (date <= lastDay.getDate()) {
-      const row = document.createElement('tr');
-
-      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-        const cell = document.createElement('td');
-
-        if (date > lastDay.getDate()) {
-          cell.innerHTML = '';
-          row.appendChild(cell);
-          continue;
-        }
-
-        if (date === 1 && dayOfWeek < firstDay.getDay()) {
-          cell.innerHTML = '';
-          row.appendChild(cell);
-          continue;
-        }
-
-        const currentDate = new Date(year, month, date);
-        const currentWeekDay = currentDate.getDay();
-
-        const dayTitle = `${weekDayNames[currentWeekDay]}, ${date}`;
-
-        let cellContent = `<div class="day-title">${dayTitle}</div>`;
-
-        people.forEach(person => {
-          const isWeekend = (currentWeekDay === 0 || currentWeekDay === 6);
-          const status = isWeekend ? 'Folga' : 'Trabalho';
-          const className = isWeekend ? 'weekend' : 'workday';
-          cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
-        });
-
-        cell.innerHTML = cellContent;
-        row.appendChild(cell);
-        date++;
-      }
-      calendarBody.appendChild(row);
-    }
-  }
-
-  function getMonthNumber(monthName) {
-    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    return monthNames.indexOf(monthName);
-  }
-
-  function getMonthName(monthNumber) {
-    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    return monthNames[monthNumber];
-  }
-
-  function getNextMonth(month, year) {
-    let nextMonth = month + 1;
-    let nextYear = year;
-    if (nextMonth > 11) {
-      nextMonth = 0;
-      nextYear++;
-    }
-    return { month: nextMonth, year: nextYear };
-  }
-
-  async function loadMonths() {
+function verificarTokenPeriodicamente() {
+  setInterval(async () => {
     try {
-      showLoading(true);
-      
-      const response = await fetch(`https://api.github.com/gists/${gistId}`);
-      
+      const response = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
       if (!response.ok) {
-        throw new Error(`Erro ao carregar gist: ${response.status}`);
+        mostrarMensagemTokenExpirado();
+      }
+    } catch (error) {
+      console.error('Erro ao verificar token:', error);
+    }
+  }, 5 * 60 * 1000); // Verifica a cada 5 minutos
+}
+
+function mostrarMensagemTokenExpirado() {
+  const mensagem = document.createElement('div');
+  mensagem.textContent = 'Token expirado. Por favor, atualize o token.';
+  mensagem.style.position = 'fixed';
+  mensagem.style.top = '0';
+  mensagem.style.left = '0';
+  mensagem.style.width = '100%';
+  mensagem.style.padding = '10px';
+  mensagem.style.background = '#f8d7da';
+  mensagem.style.color = '#721c24';
+  mensagem.style.textAlign = 'center';
+  mensagem.style.zIndex = '1000';
+
+  document.body.appendChild(mensagem);
+
+  setTimeout(() => {
+    mensagem.remove();
+  }, 5000); // Remove a mensagem após 5 segundos
+}
+
+function verificarToken() {
+  return fetch('https://api.github.com/user', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  })
+  .then(response => response.ok)
+  .catch(error => {
+    console.error('Erro ao verificar token:', error);
+    return false;
+  });
+}
+
+function exibirMesAtual() {
+  const date = new Date();
+  const monthName = getMonthName(date.getMonth());
+  const monthString = `${monthName} ${date.getFullYear()}`;
+  
+  const monthSelect = document.getElementById('month-select');
+  monthSelect.value = monthString;
+  loadMonth(monthString);
+}
+
+function buildCalendar(year, month) {
+  const calendarBody = document.getElementById('calendar-body');
+  calendarBody.innerHTML = '';
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let date = 1;
+
+  while (date <= lastDay.getDate()) {
+    const row = document.createElement('tr');
+
+    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+      const cell = document.createElement('td');
+
+      if (date > lastDay.getDate()) {
+        cell.innerHTML = '';
+        row.appendChild(cell);
+        continue;
       }
 
-      const gist = await response.json();
-      const file = gist.files[filename];
-      
-      if (file && file.content.trim()) {
-        // Tenta fazer parse do JSON primeiro
-        try {
-          const parsedContent = JSON.parse(file.content);
-          if (Array.isArray(parsedContent)) {
-            months = parsedContent;
-          } else {
-            // Se não for array, tenta como string separada por vírgulas
-            months = file.content.split(',').map(month => month.trim()).filter(month => month);
-          }
-        } catch (parseError) {
-          // Se falhar o parse JSON, trata como string separada por vírgulas
+      if (date === 1 && dayOfWeek < firstDay.getDay()) {
+        cell.innerHTML = '';
+        row.appendChild(cell);
+        continue;
+      }
+
+      const currentDate = new Date(year, month, date);
+      const currentWeekDay = currentDate.getDay();
+
+      const dayTitle = `${weekDayNames[currentWeekDay]}, ${date}`;
+
+      let cellContent = `<div class="day-title">${date}</div>`;
+
+      people.forEach(person => {
+        const isWeekend = (currentWeekDay === 0 || currentWeekDay === 6);
+        const status = isWeekend ? 'Folga' : '';
+        const className = isWeekend ? 'weekend' : '';
+        if (isWeekend) {
+        	cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
+	    } 
+      });
+
+      cell.innerHTML = cellContent;
+      row.appendChild(cell);
+      date++;
+    }
+    calendarBody.appendChild(row);
+  }
+}
+
+function getMonthNumber(monthName) {
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  return monthNames.indexOf(monthName);
+}
+
+function getMonthName(monthNumber) {
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  return monthNames[monthNumber];
+}
+
+function getNextMonth(month, year) {
+  let nextMonth = month + 1;
+  let nextYear = year;
+  if (nextMonth > 11) {
+    nextMonth = 0;
+    nextYear++;
+  }
+  return { month: nextMonth, year: nextYear };
+}
+
+async function loadMonths() {
+  try {
+    showLoading(true);
+    
+    const response = await fetch(`https://api.github.com/gists/${gistId}`);
+    
+    if (!response.ok) {
+      throw new Error(`Erro ao carregar gist: ${response.status}`);
+    }
+
+    const gist = await response.json();
+    const file = gist.files[filename];
+    
+    if (file && file.content.trim()) {
+      // Tenta fazer parse do JSON primeiro
+      try {
+        const parsedContent = JSON.parse(file.content);
+        if (Array.isArray(parsedContent)) {
+          months = parsedContent;
+        } else {
+          // Se não for array, tenta como string separada por vírgulas
           months = file.content.split(',').map(month => month.trim()).filter(month => month);
         }
+      } catch (parseError) {
+        // Se falhar o parse JSON, trata como string separada por vírgulas
+        months = file.content.split(',').map(month => month.trim()).filter(month => month);
       }
+    }
 
-      // Se não há meses salvos, cria o mês atual
-      if (months.length === 0) {
-        const date = new Date();
-        const monthName = getMonthName(date.getMonth());
-        const monthString = `${monthName} ${date.getFullYear()}`;
-        months = [monthString];
-        await saveMonths();
-      }
-
-      updateMonthSelect();
-      
-      // Carrega o último mês da lista
-      if (months.length > 0) {
-        const monthSelect = document.getElementById('month-select');
-        monthSelect.value = months[months.length - 1];
-        loadMonth(months[months.length - 1]);
-      }
-
-    } catch (error) {
-      console.error('Erro ao carregar meses:', error);
-      showError('Erro ao carregar dados do servidor. Usando dados locais.');
-      
-      // Fallback para o mês atual se houver erro
+    // Se não há meses salvos, cria o mês atual
+    if (months.length === 0) {
       const date = new Date();
       const monthName = getMonthName(date.getMonth());
       const monthString = `${monthName} ${date.getFullYear()}`;
       months = [monthString];
-      updateMonthSelect();
-      loadMonth(months[0]);
-    } finally {
-      showLoading(false);
+      await saveMonths();
     }
-  }
 
-  function updateMonthSelect() {
-    const monthSelect = document.getElementById('month-select');
-    monthSelect.innerHTML = '';
+    updateMonthSelect();
     
-    months.forEach(month => {
-      const option = document.createElement('option');
-      option.value = month;
-      option.text = month;
-      monthSelect.appendChild(option);
-    });
-  }
+    // Carrega o mês atual
+    exibirMesAtual();
 
+  } catch (error) {
+    console.error('Erro ao carregar meses:', error);
+    showError('Erro ao carregar dados do servidor. Usando dados locais.');
+    
+    // Fallback para o mês atual se houver erro
+    const date = new Date();
+    const monthName = getMonthName(date.getMonth());
+    const monthString = `${monthName} ${date.getFullYear()}`;
+    months = [monthString];
+    updateMonthSelect();
+    loadMonth(months[0]);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function updateMonthSelect() {
+  const monthSelect = document.getElementById('month-select');
+  monthSelect.innerHTML = '';
   
-  function loadMonth(month) {
-    const [monthName, year] = month.split(' ');
-    const monthNumber = getMonthNumber(monthName);
-    
-    if (monthNumber === -1) {
-      showError('Formato de mês inválido');
-      return;
-    }
-    
-    currentMonth = monthNumber;
-    currentYear = parseInt(year);
-    buildCalendar(currentYear, currentMonth);
-  }
+  months.forEach(month => {
+    const option = document.createElement('option');
+    option.value = month;
+    option.text = month;
+    monthSelect.appendChild(option);
+  });
+}
 
-  async function addNextMonth() {
-    try {
-      const nextMonth = getNextMonth(currentMonth, currentYear);
-      const monthName = getMonthName(nextMonth.month);
-      const monthString = `${monthName} ${nextMonth.year}`;
-      
-      if (!months.includes(monthString)) {
-        months.push(monthString);
-        updateMonthSelect();
-        await saveMonths();
-      }
-      
-      // Seleciona o novo mês
-      const monthSelect = document.getElementById('month-select');
-      monthSelect.value = monthString;
-      loadMonth(monthString);
-      
-    } catch (error) {
-      console.error('Erro ao adicionar mês:', error);
-      showError('Erro ao salvar novo mês');
-    }
+function loadMonth(month) {
+  const [monthName, year] = month.split(' ');
+  const monthNumber = getMonthNumber(monthName);
+  
+  if (monthNumber === -1) {
+    showError('Formato de mês inválido');
+    return;
   }
+  
+  currentMonth = monthNumber;
+  currentYear = parseInt(year);
+  
+  verificarToken()
+  .then(tokenValido => {
+    if (tokenValido) {
+      buildCalendar(currentYear, currentMonth);
+    } else {
+      mostrarMensagemTokenExpirado();
+    }
+  });
+}
 
-  async function saveMonths() {
-    try {
-      const gistData = {
-        files: {
+function addNextMonth() {
+  try {
+    // Pega o último mês da lista ao invés do mês exibido
+    const lastMonth = months[months.length - 1];
+    const [lastMonthName, lastYear] = lastMonth.split(' ');
+    const lastMonthNumber = getMonthNumber(lastMonthName);
+    
+    const nextMonth = getNextMonth(lastMonthNumber, parseInt(lastYear));
+    const monthName = getMonthName(nextMonth.month);
+    const monthString = `${monthName} ${nextMonth.year}`;
+    
+    if (!months.includes(monthString)) {
+      // Primeiro tenta salvar no gist (igual ao Gist Viewer)
+      const tempMonths = [...months, monthString];
+      
+      const dados = {
+        "files": {
           [filename]: {
-            content: JSON.stringify(months, null, 2)
+            "content": tempMonths.join(', ')
           }
         }
       };
 
-	  const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-	    headers: {
-	      'Authorization': `token ${token}`,
-	      'Content-Type': 'application/json',
-	      'Accept': 'application/vnd.github.v3+json'
-	    }
-	  });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao salvar: ${response.status}`);
-      }
-
-      console.log('Meses salvos com sucesso!');
-      
-    } catch (error) {
-      console.error('Erro ao salvar meses:', error);
-      showError('Erro ao salvar dados no servidor');
-      throw error;
+      fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados)
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Só adiciona à lista local se salvou com sucesso
+        months.push(monthString);
+        updateMonthSelect();
+        
+        // Seleciona o novo mês
+        const monthSelect = document.getElementById('month-select');
+        monthSelect.value = monthString;
+        loadMonth(monthString);
+        
+        console.log('Novo mês adicionado e salvo com sucesso!');
+      })
+      .catch(error => {
+        console.error('Erro ao salvar:', error);
+        showError('Erro ao salvar novo mês no servidor');
+      });
     }
+    
+  } catch (error) {
+    console.error('Erro ao adicionar mês:', error);
+    showError('Erro ao processar novo mês');
   }
+}
 
-  // Event listeners
-  document.getElementById('add-month-btn').addEventListener('click', addNextMonth);
-  document.getElementById('month-select').addEventListener('change', (e) => {
-    if (e.target.value) {
-      loadMonth(e.target.value);
+async function saveMonths() {
+  try {
+    const gistData = {
+      files: {
+        [filename]: {
+          content: JSON.stringify(months, null, 2)
+        }
+      }
+    };
+
+    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(gistData)
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Erro ao salvar: ${response.status}`);
     }
-  });
+  
+    console.log('Meses salvos com sucesso!');
+    
+  } catch (error) {
+    console.error('Erro ao salvar meses:', error);
+    showError('Erro ao salvar dados no servidor');
+    throw error;
+  }
+}
 
-  // Inicialização
+// Event listeners
+document.getElementById('add-month-btn').addEventListener('click', addNextMonth);
+document.getElementById('month-select').addEventListener('change', (e) => {
+  if (e.target.value) {
+    loadMonth(e.target.value);
+  }
+});
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  verificarTokenPeriodicamente();
   loadMonths();
+});
 </script>
 
 </body>
