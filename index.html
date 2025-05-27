@@ -77,15 +77,16 @@
     }
 
     .modal-content {
-      background-color: white;
-      margin: 5% auto;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
+  	  background-color: white;
+  	  margin: 5% auto;
+  	  padding: 20px;
+  	  border-radius: 8px;
+  	  width: 90%;
+  	  max-width: 750px; /* Remova o limite de largura máximo */
+  	  max-height: 80vh;
+  	  overflow-y: auto;
     }
+
 
     .modal-header {
       display: flex;
@@ -114,38 +115,49 @@
     .form-group label {
       display: block;
       margin-bottom: 5px;
-      font-weight: bold;
     }
-
+    
+    .person-selection label, .date-selection label {
+      font-weight: bold;
+      font-size: 18px; /* Aumente o tamanho da fonte */
+	}
+    
+    #scheduleModal label {
+  	  font-size: 30px; /* Aumente o tamanho da fonte */
+    }
+      
     .form-group input, .form-group select, .form-group textarea {
       width: 100%;
-      padding: 8px;
+      padding: 12px; /* Aumente o espaçamento interno */
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
+      font-size: 20px; /* Aumente o tamanho da fonte */
     }
 
     .form-group textarea {
       height: 150px;
       resize: vertical;
     }
-
+    
     .person-selection {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 15px;
-    }
-
-    .person-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .person-option input[type="radio"] {
-      width: auto;
-    }
-
+	  display: flex;
+	  gap: 20px;
+	  margin-bottom: 15px;
+	}
+	
+	.person-option {
+	  display: flex;
+	  align-items: center; /* Garante alinhamento vertical */
+	  gap: 8px;
+	}
+	
+	.person-option input[type="radio"] {
+	  width: 20px; /* 25px pode ser grande demais para alinhar com texto */
+	  height: 20px;
+	  margin: 0;
+	  vertical-align: middle; /* importante */
+	}
     .date-selection {
       display: flex;
       gap: 10px;
@@ -157,19 +169,19 @@
     }
 
     .modal-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
+  	  padding: 12px 18px; /* Aumente o espaçamento interno dos botões */
+  	  border: none;
+  	  border-radius: 4px;
+  	  cursor: pointer;
     }
 
     .modal-buttons button {
-      padding: 10px 20px;
+      padding: 15px 30px;
+      margin-right:30px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 18px; /* Aumente o tamanho da fonte */
     }
 
     .btn-primary {
@@ -191,8 +203,8 @@
     }
 
     table {
-      width: 100%;
-      max-width: 700px;
+      padding: 8px 4px;
+      width: 850px;
       margin: auto;
       border-collapse: collapse;
       table-layout: fixed;
@@ -252,59 +264,129 @@
 	  background-color: #ADD8E6;
 	  color: #000;
 	}
-
-    @media (max-width: 600px) {
-      .modal-content {
-        margin: 2% auto;
-        width: 95%;
-      }
-      
-      .person-selection {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .date-selection {
-        flex-direction: column;
-      }
-      
-      table, thead, tbody, th, td, tr {
-        display: block;
-        width: 100%;
-      }
-
-      thead tr {
-        display: none;
-      }
-
-      tbody tr {
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
-      }
-
-      tbody tr td {
-        border: none;
-        padding: 6px 10px;
-        position: relative;
-        text-align: left;
-        background: none;
-        color: inherit;
-      }
-
-      tbody tr td div:first-child {
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 8px;
-      }
-
-      .person-name {
-        display: inline-block;
-        min-width: 80px;
-      }
-    }
+	
+	/* Estilos para popups customizados */
+	#customPopup {
+	  display: none;
+	  position: fixed;
+	  z-index: 1000;
+	  left: 0;
+	  top: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(0, 0, 0, 0.5);
+	}
+	
+	.popup-content {
+	  background-color: white;
+	  margin: 50px auto 0 auto;
+	  padding: 20px;
+	  border-radius: 8px;
+	  width: 90%;
+	  max-width: 400px;
+	  text-align: center;
+	  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	  position: relative;
+	  top: 20px;
+	}
+	
+	@keyframes popupSlideIn {
+	  from {
+	    opacity: 0;
+	    transform: translate(-50%, -60%);
+	  }
+	  to {
+	    opacity: 1;
+	    transform: translate(-50%, -50%);
+	  }
+	}
+	
+	.popup-content.success {
+	  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+	}
+	
+	.popup-content.error {
+	  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+	}
+	
+	.popup-content.confirm {
+	  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+	}
+	
+	.popup-icon {
+	  font-size: 48px;
+	  margin-bottom: 15px;
+	  display: block;
+	}
+	
+	.popup-title {
+	  font-size: 22px;
+	  font-weight: bold;
+	  margin-bottom: 15px;
+	  color: white;
+	}
+	
+	.popup-content.confirm .popup-title {
+	  color: #333;
+	}
+	
+	.popup-message {
+  	  font-size: 30px;
+  	  line-height: 1.5;
+  	  margin-bottom: 25px;
+  	  color: white;
+	}
+	
+	.popup-content.confirm .popup-message {
+	  color: #555;
+	}
+	
+	.popup-buttons {
+	  display: flex;
+	  justify-content: center;
+	  gap: 15px;
+	}
+	
+	.popup-btn {
+	  padding: 12px 25px;
+	  border: none;
+	  border-radius: 8px;
+	  font-size: 16px;
+	  cursor: pointer;
+	  transition: all 0.3s ease;
+	  font-weight: 600;
+	  min-width: 100px;
+	}
+	
+	.popup-btn-primary {
+	  background-color: #007bff;
+	  color: white;
+	}
+	
+	.popup-btn-primary:hover {
+	  background-color: #0056b3;
+	  transform: translateY(-2px);
+	}
+	
+	.popup-btn-secondary {
+	  background-color: #6c757d;
+	  color: white;
+	}
+	
+	.popup-btn-secondary:hover {
+	  background-color: #5a6268;
+	  transform: translateY(-2px);
+	}
+	
+	.popup-btn-success {
+	  background-color: #28a745;
+	  color: white;
+	}
+	
+	.popup-btn-success:hover {
+	  background-color: #218838;
+	  transform: translateY(-2px);
+	}
   </style>
 </head>
 <body>
@@ -377,7 +459,7 @@
     </div>
 
     <div class="form-group">
-      <label for="schedule-table">Cole a tabela de escala ou sequência separada por ",":</label>
+      <label for="schedule-table">Cole a tabela da escala ou sequência separada por ",":</label>
       <textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
     </div>
 
@@ -408,22 +490,6 @@ function showLoading(show) {
     loadingDiv.style.display = show ? 'block' : 'none';
   }
 }
-
-
-function showError(message) {
-  const errorDiv = document.getElementById('error');
-  errorDiv.textContent = message;
-  errorDiv.className = 'alert error';
-  if (errorDiv) {
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    setTimeout(() => {
-      errorDiv.style.display = 'none';
-    }, 5000);
-  }
-}
-
-
 
 function updateUIBasedOnToken(isValid) {
     const tokenDiv = document.querySelector('.token');
@@ -526,9 +592,10 @@ function buildCalendar(year, month) {
 
   const calendarBody = document.getElementById('calendar-body');
   if (!calendarBody) {
-      console.error("Elemento 'calendar-body' não encontrado!");
-      return;
+    console.error("Elemento 'calendar-body' não encontrado!");
+    return;
   }
+  
   calendarBody.innerHTML = '';
 
   const firstDayOfMonth = new Date(year, month, 1);
@@ -539,52 +606,55 @@ function buildCalendar(year, month) {
   const monthKey = `${getMonthName(month)} ${year}`;
 
   let date = 1;
-  let row = document.createElement('tr');
-
-  for (let i = 0; i < startDayOfWeek; i++) {
-    const cell = document.createElement('td');
-    cell.classList.add('empty');
-    row.appendChild(cell);
-  }
-
-  while (date <= daysInMonth) {
-    const dayOfWeek = (startDayOfWeek + date - 1) % 7;
-
-    if (dayOfWeek === 0 && row.children.length > 0) {
-      calendarBody.appendChild(row);
-      row = document.createElement('tr');
+  
+  // Loop para criar as semanas (máximo 6 semanas)
+  for (let week = 0; week < 6; week++) {
+    const row = document.createElement('tr');
+    
+    // Loop para criar os 7 dias da semana
+    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+      const cell = document.createElement('td');
+      
+      // Se é a primeira semana e ainda não chegou no primeiro dia do mês
+      if (week === 0 && dayOfWeek < startDayOfWeek) {
+        cell.classList.add('empty');
+      }
+      // Se já passou do último dia do mês
+      else if (date > daysInMonth) {
+        cell.classList.add('empty');
+      }
+      // Dia válido do mês
+      else {
+        let cellContent = `<div class="day-title">${date}</div>`;
+        
+        people.forEach(person => {
+          let status = '';
+          let className = 'workday';
+          
+          if (schedules[person] && schedules[person][monthKey]) {
+            const dayOffList = schedules[person][monthKey];
+            if (dayOffList.includes(date)) {
+              status = 'Folga';
+              className = person.toLowerCase().replace(' ', '-') + '-day-off';
+              cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
+            }
+          }
+        });
+        
+        cell.innerHTML = cellContent;
+        date++;
+      }
+      
+      row.appendChild(cell);
     }
-
-    const cell = document.createElement('td');
-    let cellContent = `<div class="day-title">${date}</div>`;
-
-	people.forEach(person => {
-	  let status = '';
-	  let className = 'workday';
-	
-	  if (schedules[person] && schedules[person][monthKey]) {
-	    const dayOffList = schedules[person][monthKey];
-	    if (dayOffList.includes(date)) {
-	      status = 'Folga';
-	      className = person.toLowerCase().replace(' ', '-') + '-day-off';
-	      cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
-	    }
-	  }
-	  
-	});
-
-    cell.innerHTML = cellContent;
-    row.appendChild(cell);
-    date++;
+    
+    calendarBody.appendChild(row);
+    
+    // Se já processamos todos os dias do mês, podemos parar
+    if (date > daysInMonth) {
+      break;
+    }
   }
-
-  while (row.children.length < 7) {
-    const cell = document.createElement('td');
-    cell.classList.add('empty');
-    row.appendChild(cell);
-  }
-
-  calendarBody.appendChild(row);
 }
 
 function getMonthNumber(monthName) {
@@ -754,65 +824,65 @@ function loadMonth(monthYearString) {
 }
 
 // *** FUNÇÃO CORRIGIDA - v3 ***
-function parseScheduleTable(htmlTable) {
-  const tabela = document.createElement('table');
-  tabela.innerHTML = htmlTable;
-  const linhas = tabela.getElementsByTagName('tr');
-  const diasDeFolga = [];
+    function parseScheduleTable(htmlTable) {
+      // Aqui vai a implementação da função parseScheduleTable
+      const tabela = document.createElement('table');
+      tabela.innerHTML = htmlTable;
+      const linhas = tabela.getElementsByTagName('tr');
+      const diasDeFolga = [];
 
-  let mesAtual = null;
+      let mesAtual = null;
 
-  for (let i = 0; i < linhas.length; i++) {
-    const linha = linhas[i];
-    const celulas = linha.getElementsByTagName('td');
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const celulas = linha.getElementsByTagName('td');
 
-    for (let j = 0; j < celulas.length; j++) {
-      const celula = celulas[j];
-      let dia = null;
-      let conteudo = null;
+        for (let j = 0; j < celulas.length; j++) {
+          const celula = celulas[j];
+          let dia = null;
+          let conteudo = null;
 
-      if (celula.getElementsByTagName('a').length > 0) {
-        const link = celula.getElementsByTagName('a')[0];
-        conteudo = link.innerHTML.split('<br>');
-        dia = conteudo[0].replace(/[^0-9]/g, '');
-      } else {
-        conteudo = celula.innerHTML.split('<br>');
-        dia = conteudo[0].trim();
-      }
+          if (celula.getElementsByTagName('a').length > 0) {
+            const link = celula.getElementsByTagName('a')[0];
+            conteudo = link.innerHTML.split('<br>');
+            dia = conteudo[0].replace(/[^0-9]/g, '');
+          } else {
+            conteudo = celula.innerHTML.split('<br>');
+            dia = conteudo[0].trim();
+          }
 
-      if (i === 0 && j < 2) {
-        // verificar se é dia do mês anterior
-        if (parseInt(dia) > 20) {
-          continue;
+          if (i === 0 && j < 2) {
+            // verificar se é dia do mês anterior
+            if (parseInt(dia) > 20) {
+              continue;
+            }
+          }
+
+          // verificar se tem horário
+          const horarios = conteudo.slice(1).filter(h => h.trim().match(/^\d{1,2}:\d{2}$/));
+          if (horarios.length === 0 && !isNaN(parseInt(dia)) && dia !== '') {
+            diasDeFolga.push(`${dia}`);
+          }
         }
       }
 
-      // verificar se tem horário
-      const horarios = conteudo.slice(1).filter(h => h.trim().match(/^\d{1,2}:\d{2}$/));
-      if (horarios.length === 0 && dia !== null && dia !== '') {
-        diasDeFolga.push(`Folga dia ${dia}`);
-      }
+      return diasDeFolga;
     }
-  }
-
-  return diasDeFolga;
-}
-
-function parseScheduleText(text) {
-  const daysOff = text.split(',').map(day => parseInt(day.trim()));
-  return daysOff.filter(day => !isNaN(day));
-}
-
-// seleciona um dos o
-function extractDaysOffFromInput(input) {
-  if (input.startsWith('<table')) {
-    return parseScheduleTable(input);
-  } else {
-    return parseScheduleText(input);
-  }
-}
-
-
+    
+    
+    function parseScheduleText(text) {
+	  const daysOff = text.split(',').map(day => parseInt(day.trim()));
+	  return daysOff.filter(day => !isNaN(day));
+	}
+	
+	function extractDaysOffFromInput(input) {
+	  if (input.trim().toLowerCase().startsWith('<t')) {
+	    const daysOffStrings = parseScheduleTable(input);
+	    return daysOffStrings.map(dayString => parseInt(dayString));
+	  } else {
+	    return parseScheduleText(input);
+	  }
+	}
 
 async function saveSchedulesToGist() {
   if (!token) {
@@ -914,25 +984,71 @@ function closeScheduleModal() {
 }
 
 function showSuccess(message) {
-  const successDiv = document.createElement('div');
-  successDiv.textContent = message;
-  successDiv.className = 'alert success';
-  successDiv.style.backgroundColor = '#ADD8E6'; 
-  successDiv.style.color = '#000'; 
-  successDiv.style.padding = '10px';
-  successDiv.style.borderRadius = '5px';
-  successDiv.style.textAlign = 'center';
-  successDiv.style.margin = '20px 0';
-  successDiv.style.position = 'relative';
-  successDiv.style.zIndex = '10000';
+  showCustomPopup('success', '✅', 'Sucesso', message, [
+    { text: 'OK', class: 'popup-btn popup-btn-success', callback: null }
+  ]);
+}
 
-  const errorDiv = document.getElementById('error');
-  if (errorDiv) {
-    errorDiv.parentNode.insertBefore(successDiv, errorDiv);
+function showConfirm(message, callback) {
+  showCustomPopup('confirm', '❓', '', message, [
+    { text: 'Não', class: 'popup-btn popup-btn-secondary', callback: () => callback(false) },
+    { text: 'Sim', class: 'popup-btn popup-btn-primary', callback: () => callback(true) }
+  ]);
+}
+
+function showError(message) {
+  showCustomPopup('error', '❌', '', message, [
+    { text: 'OK', class: 'popup-btn popup-btn-primary', callback: null }
+  ]);
+}
+
+function showCustomPopup(type, icon, title, message, buttons) {
+  const popup = document.getElementById('customPopup');
+  const content = document.getElementById('popupContent');
+  const iconEl = document.getElementById('popupIcon');
+  const titleEl = document.getElementById('popupTitle');
+  const messageEl = document.getElementById('popupMessage');
+  const buttonsEl = document.getElementById('popupButtons');
+
+  // Configurar conteúdo
+  iconEl.textContent = icon;
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+
+  // Limpar classes antigas e adicionar nova
+  content.className = `popup-content ${type}`;
+
+  // Criar botões
+  buttonsEl.innerHTML = '';
+  buttons.forEach(button => {
+    const btn = document.createElement('button');
+    btn.textContent = button.text;
+    btn.className = button.class;
+    btn.onclick = () => {
+      closeCustomPopup();
+      if (button.callback) {
+        button.callback();
+      }
+    };
+    buttonsEl.appendChild(btn);
+  });
+
+  // Mostrar popup
+  popup.style.display = 'block';
+
+  // Auto-fechar após 5 segundos para success/error
+  if (type === 'success' || type === 'error') {
     setTimeout(() => {
-      successDiv.remove();
-    }, 7000);
+      if (popup.style.display === 'block') {
+        closeCustomPopup();
+      }
+    }, 5000);
   }
+}
+
+function closeCustomPopup() {
+  const popup = document.getElementById('customPopup');
+  popup.style.display = 'none';
 }
 
 async function saveSchedule() {
@@ -967,51 +1083,98 @@ async function saveSchedule() {
     const monthNumber = getMonthNumber(selectedMonth);
 
     if (schedules[person] && schedules[person][monthKey]) {
-      if (!confirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`)) {
-        showLoading(false);
-        return;
-      }
-      console.log(`Substituindo escala existente para ${person} em ${monthKey}`);
-    }
-
-    // Chama a função CORRIGIDA para extrair folgas
-    const daysOff = extractDaysOffFromInput(tableContent);
-
-
-    if (daysOff.length === 0) {
-      if (!confirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.')) {
-          showError('Extração de folgas cancelada ou falhou. Verifique a tabela.');
+      showConfirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`, (confirmed) => {
+        if (!confirmed) {
           showLoading(false);
           return;
-      }
-      console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
+        }
+        proceedWithSave(person, monthKey, tableContent);
+      });
+    } else {
+      proceedWithSave(person, monthKey, tableContent);
     }
-
-    if (!schedules[person]) {
-      schedules[person] = {};
-    }
-    schedules[person][monthKey] = daysOff;
-    console.log(`Escala local atualizada para ${person} em ${monthKey}:`, daysOff);
-
-    await saveSchedulesToGist();
-
-    updateMonthSelect();
-    const mainMonthSelect = document.getElementById('month-select');
-    if (mainMonthSelect) mainMonthSelect.value = monthKey;
-    loadMonth(monthKey);
-
-    closeScheduleModal();
-
-    showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
-
   } catch (error) {
     console.error('Erro detalhado ao salvar escala:', error);
-  } finally {
-      showLoading(false);
   }
 }
 
-// --- Event Listeners --- 
+function proceedWithSave(person, monthKey, tableContent) {
+  // Chama a função CORRIGIDA para extrair folgas
+  const daysOff = extractDaysOffFromInput(tableContent);
+
+  if (daysOff.length === 0) {
+    showConfirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.', (confirmed) => {
+      if (!confirmed) {
+        showError('Extração de folgas cancelada ou falhou. Verifique a tabela.');
+        showLoading(false);
+        return;
+      }
+      saveScheduleData(person, monthKey, daysOff);
+    });
+  } else {
+    saveScheduleData(person, monthKey, daysOff);
+  }
+}
+
+async function saveScheduleData(person, monthKey, daysOff) {
+  console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
+  if (!schedules[person]) {
+    schedules[person] = {};
+  }
+  schedules[person][monthKey] = daysOff;
+  console.log(`Escala local atualizada para ${person} em ${monthKey}:`, daysOff);
+
+  await saveSchedulesToGist();
+
+  updateMonthSelect();
+  const mainMonthSelect = document.getElementById('month-select');
+  if (mainMonthSelect) mainMonthSelect.value = monthKey;
+  loadMonth(monthKey);
+
+  closeScheduleModal();
+
+  showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
+  showLoading(false);
+}
+
+function proceedWithSave(person, monthKey, tableContent) {
+  // Chama a função CORRIGIDA para extrair folgas
+  const daysOff = extractDaysOffFromInput(tableContent);
+
+  if (daysOff.length === 0) {
+    showConfirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.', (confirmed) => {
+      if (!confirmed) {
+        showError('Extração de folgas cancelada ou falhou. Verifique a tabela.');
+        showLoading(false);
+        return;
+      }
+      saveScheduleData(person, monthKey, daysOff);
+    });
+  } else {
+    saveScheduleData(person, monthKey, daysOff);
+  }
+}
+
+async function saveScheduleData(person, monthKey, daysOff) {
+  console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
+  if (!schedules[person]) {
+    schedules[person] = {};
+  }
+  schedules[person][monthKey] = daysOff;
+  console.log(`Escala local atualizada para ${person} em ${monthKey}:`, daysOff);
+
+  await saveSchedulesToGist();
+
+  updateMonthSelect();
+  const mainMonthSelect = document.getElementById('month-select');
+  if (mainMonthSelect) mainMonthSelect.value = monthKey;
+  loadMonth(monthKey);
+
+  closeScheduleModal();
+
+  showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
+  showLoading(false);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const executarBtn = document.getElementById('executar-btn');
@@ -1063,6 +1226,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
+	<div id="customPopup" class="custom-popup">
+	  <div id="popupContent" class="popup-content">
+	    <div id="popupIcon" class="popup-icon"></div>
+	    <div id="popupTitle" class="popup-title"></div>
+	    <div id="popupMessage" class="popup-message"></div>
+	    <div id="popupButtons" class="popup-buttons"></div>
+	  </div>
+	</div>
 
 </body>
 </html>
