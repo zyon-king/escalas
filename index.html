@@ -15,7 +15,7 @@
     }
     
     /**/
-  	.computer-mode {
+    .computer-mode {
   	  width: 1000px;
   	  margin: 0 auto;
   	  font-size: 16px;
@@ -54,7 +54,11 @@
   	  background-color: white;
   	  transition: 0.4s;
   	}
-
+    
+	input:not(:checked) + .slider {
+	  background-color: #1abc9c; /* Cor do switch desligado */
+	}
+    
     input:checked + .slider {
       background-color: #2196F3;
     }
@@ -84,6 +88,7 @@
   	  margin-left: 10px;
   	  font-size: 16px;
   	}
+    
     /**/
 
     .token {
@@ -482,6 +487,26 @@
 	  background-color: #218838;
 	  transform: translateY(-2px);
 	}
+    
+    @media only screen and (max-width: 768px) {
+  	  table {
+  	    width: 100%;
+  	    font-size: 16px; /* Ajuste o tamanho da fonte para melhor legibilidade */
+  	  }
+	  th, td {
+	    padding: 10px; /* Ajuste o espaçamento entre células */
+	  }
+	  .controls {
+	    width: 100%; /* Ocupa toda a largura da tela */
+	    padding: 10px; /* Ajuste o espaçamento */
+	  }
+	  
+	  .token {
+	    width: 100%; /* Ocupa toda a largura da tela */
+	    padding: 10px; /* Ajuste o espaçamento */
+	  }
+	}
+    
   </style>
 </head>
 <body>
@@ -514,13 +539,13 @@
 <table>
   <thead>
     <tr>
-      <th>Domingo</th>
-      <th>Segunda</th>
-      <th>Terça</th>
-      <th>Quarta</th>
-      <th>Quinta</th>
-      <th>Sexta</th>
-      <th>Sábado</th>
+      <th>Dom</th>
+      <th>Seg</th>
+      <th>Ter</th>
+      <th>Quar</th>
+      <th>Qui</th>
+      <th>Sex</th>
+      <th>Sáb</th>
     </tr>
   </thead>
   <tbody id="calendar-body">
@@ -592,13 +617,21 @@ let token = '';
 const modeToggle = document.getElementById('mode-toggle');
 const modeStatus = document.getElementById('mode-status');
 
+// Verifica se o modo computador está ativado inicialmente
+if (document.body.classList.contains('computer-mode')) {
+  modeToggle.checked = true;
+  modeStatus.textContent = 'Modo Computador ON';
+} else {
+  modeStatus.textContent = 'Modo Mobile ON';
+}
+
 modeToggle.addEventListener('change', () => {
   if (modeToggle.checked) {
     document.body.classList.add('computer-mode');
-    modeStatus.textContent = 'Mobile Mode ON';
+    modeStatus.textContent = 'Modo Computador ON';
   } else {
     document.body.classList.remove('computer-mode');
-    modeStatus.textContent = 'Mobile Mode OFF';
+    modeStatus.textContent = 'Modo Mobile ON';
   }
 });
 // End of computer mode function
