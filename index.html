@@ -120,6 +120,7 @@
       width: 700px;
       max-width: 90%;
       height: 50px;
+  	  margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
     }
 
     .controls {
@@ -137,6 +138,7 @@
 	  font-weight: 500;
 	  transition: all 0.3s ease;
 	  min-width: 180px;
+  	  margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
 	}
 	
 	.controls select:focus {
@@ -178,12 +180,12 @@
 
     .modal-content {
   	  background-color: white;
-  	  margin: 5% auto;
+  	  margin: 1% auto;
   	  padding: 20px;
   	  border-radius: 8px;
   	  width: 90%;
   	  max-width: 750px; /* Remova o limite de largura máximo */
-  	  max-height: 80vh;
+  	  max-height: 90vh;
   	  overflow-y: auto;
     }
 
@@ -489,6 +491,10 @@
 	}
     
     @media only screen and (max-width: 768px) {
+    
+  	  #calendar-body td {
+  	    font-size: 12px; /* Defina o tamanho da fonte desejado */
+  	  }
   	  table {
   	    width: 100%;
   	    font-size: 16px; /* Ajuste o tamanho da fonte para melhor legibilidade */
@@ -542,7 +548,7 @@
       <th>Dom</th>
       <th>Seg</th>
       <th>Ter</th>
-      <th>Quar</th>
+      <th>Qua</th>
       <th>Qui</th>
       <th>Sex</th>
       <th>Sáb</th>
