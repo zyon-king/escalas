@@ -216,9 +216,12 @@
       background-color: #d4edda;
       color: #155724;
     }
-    .day-off {
-	  background-color: #d4edda; /* verde claro */
-	  color: #155724; /* texto verde escuro */
+    .cris-day-off {
+	  background-color: #FFC0CB; /* rosa claro */
+	}
+	
+	.clei-day-off {
+	  background-color: #b8daff; /* azul claro */
 	}
     .person-name {
       font-weight: bold;
@@ -230,15 +233,25 @@
       color: #666;
     }
 
-    .error {
-      text-align: center;
-      padding: 20px;
-      color: #d63384;
-      background-color: #f8d7da;
-      border: 1px solid #f5c2c7;
-      border-radius: 4px;
-      margin: 20px 0;
-    }
+	.alert {
+	  position: relative;
+	  z-index: 10000;
+	  text-align: center;
+	  padding: 20px;
+	  border-radius: 4px;
+	  margin: 20px 0;
+	}
+	
+	.error {
+	  background-color: #f8d7da;
+	  color: #d63384;
+	  border: 1px solid #f5c2c7;
+	}
+	
+	.success {
+	  background-color: #ADD8E6;
+	  color: #000;
+	}
 
     @media (max-width: 600px) {
       .modal-content {
@@ -364,7 +377,7 @@
     </div>
 
     <div class="form-group">
-      <label for="schedule-table">Cole a tabela de escala:</label>
+      <label for="schedule-table">Cole a tabela de escala ou sequência separada por ",":</label>
       <textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
     </div>
 
@@ -396,8 +409,11 @@ function showLoading(show) {
   }
 }
 
+
 function showError(message) {
   const errorDiv = document.getElementById('error');
+  errorDiv.textContent = message;
+  errorDiv.className = 'alert error';
   if (errorDiv) {
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
@@ -406,6 +422,8 @@ function showError(message) {
     }, 5000);
   }
 }
+
+
 
 function updateUIBasedOnToken(isValid) {
     const tokenDiv = document.querySelector('.token');
@@ -540,20 +558,20 @@ function buildCalendar(year, month) {
     const cell = document.createElement('td');
     let cellContent = `<div class="day-title">${date}</div>`;
 
-    people.forEach(person => {
-      let status = '';
-      let className = 'workday';
-
-      if (schedules[person] && schedules[person][monthKey]) {
-        const dayOffList = schedules[person][monthKey];
-        if (dayOffList.includes(date)) {
-          status = 'Folga';
-          className = 'weekend';
-          cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
-        }
-      }
-      
-    });
+	people.forEach(person => {
+	  let status = '';
+	  let className = 'workday';
+	
+	  if (schedules[person] && schedules[person][monthKey]) {
+	    const dayOffList = schedules[person][monthKey];
+	    if (dayOffList.includes(date)) {
+	      status = 'Folga';
+	      className = person.toLowerCase().replace(' ', '-') + '-day-off';
+	      cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
+	    }
+	  }
+	  
+	});
 
     cell.innerHTML = cellContent;
     row.appendChild(cell);
@@ -780,6 +798,19 @@ function parseScheduleTable(htmlTable) {
   return diasDeFolga;
 }
 
+function parseScheduleText(text) {
+  const daysOff = text.split(',').map(day => parseInt(day.trim()));
+  return daysOff.filter(day => !isNaN(day));
+}
+
+// seleciona um dos o
+function extractDaysOffFromInput(input) {
+  if (input.startsWith('<table')) {
+    return parseScheduleTable(input);
+  } else {
+    return parseScheduleText(input);
+  }
+}
 
 
 
@@ -882,6 +913,28 @@ function closeScheduleModal() {
   }
 }
 
+function showSuccess(message) {
+  const successDiv = document.createElement('div');
+  successDiv.textContent = message;
+  successDiv.className = 'alert success';
+  successDiv.style.backgroundColor = '#ADD8E6'; 
+  successDiv.style.color = '#000'; 
+  successDiv.style.padding = '10px';
+  successDiv.style.borderRadius = '5px';
+  successDiv.style.textAlign = 'center';
+  successDiv.style.margin = '20px 0';
+  successDiv.style.position = 'relative';
+  successDiv.style.zIndex = '10000';
+
+  const errorDiv = document.getElementById('error');
+  if (errorDiv) {
+    errorDiv.parentNode.insertBefore(successDiv, errorDiv);
+    setTimeout(() => {
+      successDiv.remove();
+    }, 7000);
+  }
+}
+
 async function saveSchedule() {
   showLoading(true);
   try {
@@ -922,7 +975,8 @@ async function saveSchedule() {
     }
 
     // Chama a função CORRIGIDA para extrair folgas
-    const daysOff = parseScheduleTable(tableContent).map(day => parseInt(day.replace('Folga dia ', '')));
+    const daysOff = extractDaysOffFromInput(tableContent);
+
 
     if (daysOff.length === 0) {
       if (!confirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.')) {
@@ -948,7 +1002,7 @@ async function saveSchedule() {
 
     closeScheduleModal();
 
-    showError(`Escala de ${person} para ${monthKey} salva com sucesso!`);
+    showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
 
   } catch (error) {
     console.error('Erro detalhado ao salvar escala:', error);
