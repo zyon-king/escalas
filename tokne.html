@@ -510,20 +510,19 @@ function buildCalendar(year, month) {
       let cellContent = `<div class="day-title">${date}</div>`;
 
       people.forEach(person => {
-        let status = 'Trabalho';
-        let className = 'workday';
-        
-        // Verifica se existe escala para esta pessoa neste mês
-        if (schedules[person] && schedules[person][monthKey]) {
-          const dayOffList = schedules[person][monthKey];
-          if (dayOffList.includes(date)) {
-            status = 'Folga';
-            className = 'weekend';
-          }
+      let status = '';
+      let className = 'workday';
+
+      if (schedules[person] && schedules[person][monthKey]) {
+        const dayOffList = schedules[person][monthKey];
+        if (dayOffList.includes(date)) {
+          status = 'Folga';
+          className = 'weekend';
+          cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
         }
-        
-        cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
-      });
+      }
+      
+    });
 
       cell.innerHTML = cellContent;
       row.appendChild(cell);
