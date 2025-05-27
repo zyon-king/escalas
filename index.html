@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Escala de Trabalho - Mês Completo</title>
+  <title>Escala de Folgas - Mês Completo</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -525,7 +525,7 @@
   <span class="mode-status" id="mode-status">Mode</span>
 </div>
 
-<h1>Escala de Trabalho</h1>
+<h1>Escala de Folgas</h1>
 
 <div class="token">
   <input type="password" id="tokenInput" placeholder="Insira o token">
@@ -536,7 +536,7 @@
   <select id="month-select">
     <option value="">Carregando...</option>
   </select>
-  <button id="add-schedule-btn">Adicionar Escala</button>
+  <button id="add-schedule-btn">Adicionar Folgas</button>
 </div>
 
 <div id="loading" class="loading" style="display: none;">Carregando dados...</div>
@@ -562,7 +562,7 @@
 <div id="scheduleModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Adicionar Escala</h2>
+      <h2>Adicionar Folgas</h2>
       <span class="close">&times;</span>
     </div>
     
@@ -593,7 +593,7 @@
     </div>
 
     <div class="form-group">
-      <label for="schedule-table">Cole a tabela da escala ou sequência separada por ",":</label>
+      <label for="schedule-table">Cole a tabela HTML da escala ou sequência separada por ",":</label>
       <textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
     </div>
 
@@ -792,9 +792,9 @@ function buildCalendar(year, month) {
           if (schedules[person] && schedules[person][monthKey]) {
             const dayOffList = schedules[person][monthKey];
             if (dayOffList.includes(date)) {
-              status = 'Folga';
+              status = '';
               className = person.toLowerCase().replace(' ', '-') + '-day-off';
-              cellContent += `<div class="${className}"><span class="person-name">${person}:</span> ${status}</div>`;
+              cellContent += `<div class="${className}"><span class="person-name">${person}</span> ${status}</div>`;
             }
           }
         });
