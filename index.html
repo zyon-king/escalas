@@ -1293,26 +1293,47 @@ async function saveSchedule() {
     }
 
     const monthKey = `${selectedMonth} ${selectedYear}`;
-    const year = parseInt(selectedYear);
-    const monthNumber = getMonthNumber(selectedMonth);
+    
+    // Função interna para processar o salvamento após extrair os dias
+    const processSave = async () => {
+        try {
+            const daysOff = extractDaysOffFromInput(tableContent);
+            // Verifica se daysOff é um array válido (mesmo que vazio)
+            if (!Array.isArray(daysOff)) {
+                console.error('Erro: extractDaysOffFromInput não retornou um array.', daysOff);
+                showError('Ocorreu um erro ao processar os dias de folga. Verifique o formato da entrada.');
+                showLoading(false);
+                return;
+            }
+            await saveScheduleData(person, monthKey, daysOff);
+        } catch (error) {
+            console.error('Erro ao processar ou salvar a escala:', error);
+            showError(`Erro ao salvar: ${error.message || 'Erro desconhecido'}`);
+            showLoading(false);
+        }
+    };
 
     if (schedules[person] && schedules[person][monthKey]) {
       showConfirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`, (confirmed) => {
-        if (!confirmed) {
-          showLoading(false);
-          return;
+        if (confirmed) {
+          processSave(); // Chama a função interna para salvar
+        } else {
+          showLoading(false); // Esconde o loading se o usuário cancelar
+          console.log('Substituição cancelada pelo usuário.');
         }
-        proceedWithSave(person, monthKey, tableContent);
       });
     } else {
-      proceedWithSave(person, monthKey, tableContent);
+      processSave(); // Chama a função interna para salvar (sem confirmação necessária)
     }
+
   } catch (error) {
-    console.error('Erro detalhado ao salvar escala:', error);
+    // Captura erros gerais que podem ocorrer antes da lógica de confirmação/salvamento
+    console.error('Erro geral na função saveSchedule:', error);
+    showError(`Ocorreu um erro inesperado: ${error.message}`);
+    showLoading(false);
   }
+  // Removido o showLoading(false) daqui, pois ele é chamado dentro de processSave ou no cancelamento
 }
-
-
 
 async function saveScheduleData(person, monthKey, daysOff) {
   console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
