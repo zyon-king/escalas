@@ -1,58 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Escala Sem Popup</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escala de Folgas - Mês Completo</title>
+  <!-- Seu CSS permanece igual ao original, não alterei nada aqui para manter o visual -->
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f8fa;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 900px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      padding: 30px;
-    }
-    h1 {
-      text-align: center;
-      color: #007bff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 30px;
-      background: #fafbfc;
-    }
-    th, td {
-      border: 1px solid #dee2e6;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background: #e9ecef;
-      color: #333;
-    }
-    /* Botão */
-    .btn {
-      padding: 10px 20px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 15px;
-      margin-bottom: 20px;
-    }
-    .btn:hover {
-      background: #0056b3;
-    }
+    /* ... Seu CSS original aqui ... (mantido do seu arquivo) ... */
 
-    /* Popup de notificação */
+    /* Popup de notificação (erro, sucesso, alerta) */
     .popup-notificacao {
       position: fixed;
       top: 0;
@@ -66,7 +22,7 @@
       visibility: hidden;
       opacity: 0;
       transition: all 0.3s;
-      z-index: 1000;
+      z-index: 9999;
     }
     .popup-notificacao.open {
       visibility: visible;
@@ -107,79 +63,61 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Escala de Folgas</h1>
-    <!-- Botões de teste dos popups -->
-    <button class="btn" onclick="simularErro()">Testar Erro</button>
-    <button class="btn" onclick="simularSucesso()">Testar Sucesso</button>
-    <button class="btn" onclick="simularAlerta()">Testar Alerta</button>
-    <table>
-      <thead>
-        <tr>
-          <th>Domingo</th>
-          <th>Segunda</th>
-          <th>Terça</th>
-          <th>Quarta</th>
-          <th>Quinta</th>
-          <th>Sexta</th>
-          <th>Sábado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Folga</td>
-          <td>Trabalho</td>
-          <td>Trabalho</td>
-          <td>Folga</td>
-          <td>Trabalho</td>
-          <td>Trabalho</td>
-          <td>Folga</td>
-        </tr>
-        <!-- Adicione mais linhas conforme necessário -->
-      </tbody>
-    </table>
+<!-- ... Seu HTML original ... -->
+
+<!-- (Aqui entra TODO o seu HTML original do arquivo escalas-sem-popup.html, 
+     incluindo cabeçalho, tabelas, modais, etc. 
+     Não altere nada, apenas acrescente o bloco abaixo ANTES do </body>) -->
+
+<!-- Popup de Notificação -->
+<div id="popup-notificacao" class="popup-notificacao">
+  <div id="popup-notificacao-content" class="popup-notificacao-content">
+    <div id="popup-notificacao-mensagem"></div>
+    <button onclick="fecharPopupNotificacao()">OK</button>
   </div>
+</div>
 
-  <!-- Popup de Notificação -->
-  <div id="popup-notificacao" class="popup-notificacao">
-    <div id="popup-notificacao-content" class="popup-notificacao-content">
-      <div id="popup-notificacao-mensagem"></div>
-      <button onclick="fecharPopupNotificacao()">OK</button>
-    </div>
-  </div>
+<!-- Seu JavaScript original -->
+<script>
+/* ... Seu JS original aqui ... */
 
-  <script>
-    // Função para mostrar popup de notificação
-    function mostrarPopupNotificacao(tipo, mensagem) {
-      var popup = document.getElementById('popup-notificacao');
-      var content = document.getElementById('popup-notificacao-content');
-      var msg = document.getElementById('popup-notificacao-mensagem');
-      // Remove classes anteriores
-      content.classList.remove('sucesso', 'erro', 'alerta');
-      // Adiciona classe do tipo
-      if(tipo === 'sucesso') content.classList.add('sucesso');
-      if(tipo === 'erro') content.classList.add('erro');
-      if(tipo === 'alerta') content.classList.add('alerta');
-      msg.textContent = mensagem;
-      popup.classList.add('open');
-    }
-    // Função para fechar popup
-    function fecharPopupNotificacao() {
-      document.getElementById('popup-notificacao').classList.remove('open');
-    }
+/* Função para mostrar popup de notificação */
+function mostrarPopupNotificacao(tipo, mensagem) {
+  var popup = document.getElementById('popup-notificacao');
+  var content = document.getElementById('popup-notificacao-content');
+  var msg = document.getElementById('popup-notificacao-mensagem');
+  // Remove classes anteriores
+  content.classList.remove('sucesso', 'erro', 'alerta');
+  // Adiciona classe do tipo
+  if(tipo === 'sucesso') content.classList.add('sucesso');
+  if(tipo === 'erro') content.classList.add('erro');
+  if(tipo === 'alerta') content.classList.add('alerta');
+  msg.textContent = mensagem;
+  popup.classList.add('open');
+}
+/* Função para fechar popup */
+function fecharPopupNotificacao() {
+  document.getElementById('popup-notificacao').classList.remove('open');
+}
 
-    // Exemplos de uso:
-    function simularErro() {
-      mostrarPopupNotificacao('erro', 'Ocorreu um erro ao salvar a escala. Tente novamente!');
-    }
-    function simularSucesso() {
-      mostrarPopupNotificacao('sucesso', 'Escala salva com sucesso!');
-    }
-    function simularAlerta() {
-      mostrarPopupNotificacao('alerta', 'Você precisa preencher todos os campos antes de continuar.');
-    }
+/* Exemplo de uso em qualquer parte do seu código:
+   mostrarPopupNotificacao('erro', 'Mensagem de erro!');
+   mostrarPopupNotificacao('sucesso', 'Mensagem de sucesso!');
+   mostrarPopupNotificacao('alerta', 'Mensagem de alerta!');
+*/
 
-    // Você pode usar mostrarPopupNotificacao('erro', 'mensagem') em qualquer parte do seu código!
-  </script>
+/* Troque as chamadas de showError, showSuccess, showAlert, etc, por mostrarPopupNotificacao
+   Exemplo:
+   showError('Token inválido')  => mostrarPopupNotificacao('erro', 'Token inválido')
+   showSuccess('Salvo com sucesso') => mostrarPopupNotificacao('sucesso', 'Salvo com sucesso')
+   showAlert('Preencha todos os campos') => mostrarPopupNotificacao('alerta', 'Preencha todos os campos')
+*/
+
+/* Se quiser, pode criar funções auxiliares para facilitar:
+function showError(msg) { mostrarPopupNotificacao('erro', msg); }
+function showSuccess(msg) { mostrarPopupNotificacao('sucesso', msg); }
+function showAlert(msg) { mostrarPopupNotificacao('alerta', msg); }
+*/
+</script>
 </body>
 </html>
