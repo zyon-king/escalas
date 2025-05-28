@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Escala Sem Popup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #fafbfc;
+    }
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #e9ecef;
+      color: #333;
+    }
+    /* Botão */
+    .btn {
+      padding: 10px 20px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    /* Popup de notificação */
+    .popup-notificacao {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    .popup-notificacao.open {
+      visibility: visible;
+      opacity: 1;
+    }
+    .popup-notificacao-content {
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px 20px 20px 20px;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+    }
+    .popup-notificacao-content.sucesso {
+      border-top: 6px solid #28a745;
+    }
+    .popup-notificacao-content.erro {
+      border-top: 6px solid #dc3545;
+    }
+    .popup-notificacao-content.alerta {
+      border-top: 6px solid #ffc107;
+    }
+    .popup-notificacao-content button {
+      margin-top: 18px;
+      padding: 8px 18px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .popup-notificacao-content button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Escala de Folgas</h1>
+    <!-- Botões de teste dos popups -->
+    <button class="btn" onclick="simularErro()">Testar Erro</button>
+    <button class="btn" onclick="simularSucesso()">Testar Sucesso</button>
+    <button class="btn" onclick="simularAlerta()">Testar Alerta</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Domingo</th>
+          <th>Segunda</th>
+          <th>Terça</th>
+          <th>Quarta</th>
+          <th>Quinta</th>
+          <th>Sexta</th>
+          <th>Sábado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Folga</td>
+          <td>Trabalho</td>
+          <td>Trabalho</td>
+          <td>Folga</td>
+          <td>Trabalho</td>
+          <td>Trabalho</td>
+          <td>Folga</td>
+        </tr>
+        <!-- Adicione mais linhas conforme necessário -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Popup de Notificação -->
+  <div id="popup-notificacao" class="popup-notificacao">
+    <div id="popup-notificacao-content" class="popup-notificacao-content">
+      <div id="popup-notificacao-mensagem"></div>
+      <button onclick="fecharPopupNotificacao()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // Função para mostrar popup de notificação
+    function mostrarPopupNotificacao(tipo, mensagem) {
+      var popup = document.getElementById('popup-notificacao');
+      var content = document.getElementById('popup-notificacao-content');
+      var msg = document.getElementById('popup-notificacao-mensagem');
+      // Remove classes anteriores
+      content.classList.remove('sucesso', 'erro', 'alerta');
+      // Adiciona classe do tipo
+      if(tipo === 'sucesso') content.classList.add('sucesso');
+      if(tipo === 'erro') content.classList.add('erro');
+      if(tipo === 'alerta') content.classList.add('alerta');
+      msg.textContent = mensagem;
+      popup.classList.add('open');
+    }
+    // Função para fechar popup
+    function fecharPopupNotificacao() {
+      document.getElementById('popup-notificacao').classList.remove('open');
+    }
+
+    // Exemplos de uso:
+    function simularErro() {
+      mostrarPopupNotificacao('erro', 'Ocorreu um erro ao salvar a escala. Tente novamente!');
+    }
+    function simularSucesso() {
+      mostrarPopupNotificacao('sucesso', 'Escala salva com sucesso!');
+    }
+    function simularAlerta() {
+      mostrarPopupNotificacao('alerta', 'Você precisa preencher todos os campos antes de continuar.');
+    }
+
+    // Você pode usar mostrarPopupNotificacao('erro', 'mensagem') em qualquer parte do seu código!
+  </script>
+</body>
+</html>
