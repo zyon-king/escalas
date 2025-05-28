@@ -2840,18 +2840,6 @@ async function saveSchedule() {
 
 
 
-    if (!tableContent) {
-
-      showError('Por favor, cole a tabela de escala.');
-
-      showLoading(false);
-
-      return;
-
-    }
-
-
-
     const monthKey = `${selectedMonth} ${selectedYear}`;
 
     const year = parseInt(selectedYear);
