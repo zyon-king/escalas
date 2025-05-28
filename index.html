@@ -260,17 +260,17 @@
 	  margin: 0;
 	  vertical-align: middle; /* importante */
 	}
-    .date-selection {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+  .date-selection {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
 
-    .date-selection select {
-      flex: 1;
-    }
+  .date-selection select {
+    flex: 1;
+  }
 
-    .modal-buttons button {
+  .modal-buttons button {
 	  padding: 15px 30px;
 	  margin-right: 30px;
 	  border: none;
@@ -280,9 +280,17 @@
 	  transition: all 0.3s ease;
 	  font-weight: 600;
 	  min-width: 120px;
-  	  margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
+  	margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
 	}
 	
+	.modal-step {
+    min-height: 200px;
+  }
+  
+  .modal-step.hidden {
+    display: none !important;
+  }
+  
 	.btn-primary {
 	  background-color: #007bff;
 	  color: white;
@@ -541,7 +549,7 @@
   <select id="month-select">
     <option value="">Carregando...</option>
   </select>
-  <button id="add-schedule-btn">Adicionar Folgas</button>
+  <button id="add-schedule-btn">Editar Folgas</button>
 </div>
 
 <div id="loading" class="loading" style="display: none;">Carregando dados...</div>
@@ -567,50 +575,64 @@
 <div id="scheduleModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Adicionar Folgas</h2>
+      <h2>Editar Folgas</h2>
       <span class="close">&times;</span>
     </div>
     
-    <div class="form-group">
-      <label>Selecione a pessoa:</label>
-      <div class="person-selection">
-        <div class="person-option">
-		  <input type="radio" id="cris" name="pessoa" value="Cris">
-		  <label for="cris">Cris</label>
-		</div>
-		<div class="person-option">
-		  <input type="radio" id="clei" name="pessoa" value="Clei">
-		  <label for="clei">Clei</label>
-		</div>
+    <!-- Primeira etapa: Seleção de dados -->
+    <div id="step1" class="modal-step">
+      <div class="form-group">
+        <label>Selecione a pessoa:</label>
+        <div class="person-selection">
+          <div class="person-option">
+            <input type="radio" id="cris" name="pessoa" value="Cris">
+            <label for="cris">Cris</label>
+          </div>
+          <div class="person-option">
+            <input type="radio" id="clei" name="pessoa" value="Clei">
+            <label for="clei">Clei</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Período da escala:</label>
+        <div class="date-selection">
+          <select id="schedule-month">
+            <option value="">Selecione o mês</option>
+          </select>
+          <select id="schedule-year">
+            <option value="">Selecione o ano</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="cancel-btn">Cancelar</button>
+        <button class="btn-primary" id="next-btn">Avançar</button>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Período da escala:</label>
-      <div class="date-selection">
-        <select id="schedule-month">
-          <option value="">Selecione o mês</option>
-        </select>
-        <select id="schedule-year">
-          <option value="">Selecione o ano</option>
-        </select>
+    <!-- Segunda etapa: Input das folgas -->
+    <div id="step2" class="modal-step" style="display: none;">
+      <div class="form-group">
+        <label for="schedule-table">Cole a tabela HTML da escala ou sequência separada por ",":</label>
+        <textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="schedule-table">Cole a tabela HTML da escala ou sequência separada por ",":</label>
-      <textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
-    </div>
-
-    <div class="modal-buttons">
-      <button class="btn-secondary" id="cancel-btn">Cancelar</button>
-      <button class="btn-primary" id="save-schedule-btn">Salvar Escala</button>
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="back-btn">Voltar</button>
+        <button class="btn-primary" id="save-schedule-btn">Salvar Escala</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-//script página escala de trabalho - v3 corrigido para regras de folga
+const addScheduleBtn = document.getElementById('add-schedule-btn');
+const monthSelect = document.getElementById('month-select');
+const closeBtn = document.querySelector('.close');
+const cancelBtn = document.getElementById('cancel-btn');
 const gistId = 'b996dc535ebcc23c8b45f8979b4d86e0';
 const filename = 'escalas_trabalho.json';
 
@@ -1102,6 +1124,10 @@ function openScheduleModal() {
   const modal = document.getElementById('scheduleModal');
   if (!modal) return;
 
+  // Reset steps
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('step2').style.display = 'none';
+
   const monthSelect = document.getElementById('schedule-month');
   const yearSelect = document.getElementById('schedule-year');
 
@@ -1214,6 +1240,31 @@ function closeCustomPopup() {
   popup.style.display = 'none';
 }
 
+function goToStep2() {
+  const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
+  const selectedMonth = document.getElementById('schedule-month').value;
+  const selectedYear = document.getElementById('schedule-year').value;
+
+  if (!selectedPersonRadio) {
+    showError('Por favor, selecione uma pessoa.');
+    return;
+  }
+
+  if (!selectedMonth || !selectedYear) {
+    showError('Por favor, selecione o mês e ano.');
+    return;
+  }
+
+  // Avançar para step 2
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+}
+
+function goToStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+}
+
 async function saveSchedule() {
   showLoading(true);
   try {
@@ -1261,62 +1312,7 @@ async function saveSchedule() {
   }
 }
 
-function proceedWithSave(person, monthKey, tableContent) {
-  // Chama a função CORRIGIDA para extrair folgas
-  const daysOff = extractDaysOffFromInput(tableContent);
 
-  if (daysOff.length === 0) {
-    showConfirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.', (confirmed) => {
-      if (!confirmed) {
-        showError('Extração de folgas cancelada ou falhou. Verifique a tabela.');
-        showLoading(false);
-        return;
-      }
-      saveScheduleData(person, monthKey, daysOff);
-    });
-  } else {
-    saveScheduleData(person, monthKey, daysOff);
-  }
-}
-
-async function saveScheduleData(person, monthKey, daysOff) {
-  console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
-  if (!schedules[person]) {
-    schedules[person] = {};
-  }
-  schedules[person][monthKey] = daysOff;
-  console.log(`Escala local atualizada para ${person} em ${monthKey}:`, daysOff);
-
-  await saveSchedulesToGist();
-
-  updateMonthSelect();
-  const mainMonthSelect = document.getElementById('month-select');
-  if (mainMonthSelect) mainMonthSelect.value = monthKey;
-  loadMonth(monthKey);
-
-  closeScheduleModal();
-
-  showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
-  showLoading(false);
-}
-
-function proceedWithSave(person, monthKey, tableContent) {
-  // Chama a função CORRIGIDA para extrair folgas
-  const daysOff = extractDaysOffFromInput(tableContent);
-
-  if (daysOff.length === 0) {
-    showConfirm('Nenhum dia de folga foi identificado na tabela. Isso está correto? Se sim, a escala será salva sem folgas para este mês.', (confirmed) => {
-      if (!confirmed) {
-        showError('Extração de folgas cancelada ou falhou. Verifique a tabela.');
-        showLoading(false);
-        return;
-      }
-      saveScheduleData(person, monthKey, daysOff);
-    });
-  } else {
-    saveScheduleData(person, monthKey, daysOff);
-  }
-}
 
 async function saveScheduleData(person, monthKey, daysOff) {
   console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
@@ -1340,50 +1336,53 @@ async function saveScheduleData(person, monthKey, daysOff) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const executarBtn = document.getElementById('executar-btn');
+  
+  // Obter referências dos elementos
   const addScheduleBtn = document.getElementById('add-schedule-btn');
   const monthSelect = document.getElementById('month-select');
-
-  // O botão 'executar-btn' já tem onclick no HTML
-
-  if (addScheduleBtn) {
-    addScheduleBtn.addEventListener('click', openScheduleModal);
-  }
-
+  const modal = document.getElementById('scheduleModal');
+  const closeBtn = modal?.querySelector('.close');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const backBtn = document.getElementById('back-btn');
+  const saveBtn = document.getElementById('save-schedule-btn');
+  
+  // Event listeners
+  if (closeBtn) closeBtn.addEventListener('click', closeScheduleModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeScheduleModal);
+  if (nextBtn) nextBtn.addEventListener('click', goToStep2);
+  if (backBtn) backBtn.addEventListener('click', goToStep1);
+  if (saveBtn) saveBtn.addEventListener('click', saveSchedule);
+  if (addScheduleBtn) addScheduleBtn.addEventListener('click', openScheduleModal);
+  
   if (monthSelect) {
     monthSelect.addEventListener('change', (e) => {
       loadMonth(e.target.value);
     });
   }
 
-  const modal = document.getElementById('scheduleModal');
+  // Modal click outside to close
   if (modal) {
-      const closeBtn = modal.querySelector('.close');
-      const cancelBtn = document.getElementById('cancel-btn');
-      const saveBtn = document.getElementById('save-schedule-btn');
-
-      if (closeBtn) closeBtn.addEventListener('click', closeScheduleModal);
-      if (cancelBtn) cancelBtn.addEventListener('click', closeScheduleModal);
-      if (saveBtn) saveBtn.addEventListener('click', saveSchedule);
-
-      window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          closeScheduleModal();
-        }
-      });
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeScheduleModal();
+      }
+    });
   }
 
+  // Inicialização
   updateUIBasedOnToken(false);
 
   const savedToken = localStorage.getItem('githubToken');
   if (savedToken) {
-      document.getElementById('tokenInput').value = savedToken;
-      setTimeout(usarToken, 100);
+    document.getElementById('tokenInput').value = savedToken;
+    setTimeout(usarToken, 100);
   } else {
-      if(monthSelect) {
-          monthSelect.innerHTML = '<option value="">Informe o token primeiro</option>';
-          monthSelect.disabled = true;
-      }
+    const monthSelectEl = document.getElementById('month-select');
+    if (monthSelectEl) {
+      monthSelectEl.innerHTML = '<option value="">Informe o token primeiro</option>';
+      monthSelectEl.disabled = true;
+    }
   }
 });
 
