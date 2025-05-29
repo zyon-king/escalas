@@ -72,5 +72,82 @@
       .catch(error => console.error(error));
     });
   </script>
+  
+  <h1>Insira a tabela HTML:</h1>
+<textarea id="htmlTable" rows="10" cols="50"></textarea>
+<button id="enviar">Enviar</button>
+<div id="resultado"></div>
+
+<script>
+const tabelaInput = document.getElementById('htmlTable');
+const enviarButton = document.getElementById('enviar');
+const resultadoDiv = document.getElementById('resultado');
+
+enviarButton.addEventListener('click', () => {
+  const inputValue = tabelaInput.value;
+  const resultado = extractDaysOffFromInput(inputValue);
+  resultadoDiv.innerText = JSON.stringify(resultado, null, 2);
+});
+
+function parseScheduleTable(htmlTable) {
+  // Implementação da função parseScheduleTable
+  const tabela = document.createElement('table');
+  tabela.innerHTML = htmlTable;
+  const linhas = tabela.getElementsByTagName('tr');
+  const diasDeFolga = [];
+
+  let mesAtual = null;
+
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i];
+    const celulas = linha.getElementsByTagName('td');
+
+    for (let j = 0; j < celulas.length; j++) {
+      const celula = celulas[j];
+      let dia = null;
+      let conteudo = null;
+
+      if (celula.getElementsByTagName('a').length > 0) {
+        const link = celula.getElementsByTagName('a')[0];
+        conteudo = link.innerHTML.split('<br>');
+        dia = conteudo[0].replace(/[^0-9]/g, '');
+      } else {
+        conteudo = celula.innerHTML.split('<br>');
+        dia = conteudo[0].trim();
+      }
+
+      if (i === 0 && j < 2) {
+        // verificar se é dia do mês anterior
+        if (parseInt(dia) > 20) {
+          continue;
+        }
+      }
+
+      // verificar se tem horário
+      const horarios = conteudo.slice(1).filter(h => h.trim().match(/^\d{1,2}:\d{2}$/));
+      if (horarios.length === 0 && !isNaN(parseInt(dia)) && dia !== '') {
+        diasDeFolga.push(`${dia}`);
+      }
+    }
+  }
+
+  return diasDeFolga;
+}
+
+function parseScheduleText(text) {
+  const daysOff = text.split(',').map(day => parseInt(day.trim()));
+  return daysOff.filter(day => !isNaN(day));
+}
+
+function extractDaysOffFromInput(input) {
+  if (input.trim().toLowerCase().startsWith('<table')) {
+    const daysOffStrings = parseScheduleTable(input);
+    return daysOffStrings.map(dayString => parseInt(dayString));
+  } else {
+    return parseScheduleText(input);
+  }
+}
+</script>
+  
 </body>
 </html>
