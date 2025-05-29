@@ -2073,13 +2073,12 @@
 			      }
 			    }
 			
-			    // Prioriza os dias do calendário, mas usa o textarea se o calendário estiver vazio
-			    if (calendarDays.length > 0) {
-			      daysOff = calendarDays;
-			      console.log("Usando dias do calendário:", daysOff);
-			    } else if (textareaDays.length > 0) {
-			      daysOff = textareaDays;
-			      console.log("Usando dias do textarea:", daysOff);
+			    
+			    // Combina os dias do calendário E do textarea (sem duplicatas)
+			    const combinedDays = [...new Set([...calendarDays, ...textareaDays])].sort((a, b) => a - b);
+			    if (combinedDays.length > 0) {
+			      daysOff = combinedDays;
+			      console.log("Usando dias combinados (calendário + textarea):", daysOff);
 			    } else {
 			      // Se ambos estiverem vazios, verifica se já existe uma escala
 			      if (schedules[person] && schedules[person][monthKey]) {
@@ -2234,67 +2233,109 @@
 			  const saveBtn = document.getElementById('save-schedule-btn');
 			
 			
-		// Links para alternar entre calendário e input de tabela
-		const showTableInputLink = document.getElementById('show-table-input');
-		const showCalendarLink = document.getElementById('show-calendar');
-		const calendarSection = document.getElementById('calendar-section');
-		const tableInputSection = document.getElementById('table-input-section');
-		
-		if (showTableInputLink) {
-		  showTableInputLink.addEventListener('click', (e) => {
-		    e.preventDefault();
-		    calendarSection.style.display = 'none';
-		    tableInputSection.style.display = 'block';
-		  });
-		}
-		
-		if (showCalendarLink) {
-		  showCalendarLink.addEventListener('click', (e) => {
-		    e.preventDefault();
-		    tableInputSection.style.display = 'none';
-		    calendarSection.style.display = 'block';
-		  });
-		}
+			// Links para alternar entre calendário e input de tabela
+			const showTableInputLink = document.getElementById('show-table-input');
+			const showCalendarLink = document.getElementById('show-calendar');
+			const calendarSection = document.getElementById('calendar-section');
+			const tableInputSection = document.getElementById('table-input-section');
 			
-		// Event listeners
-		if (closeBtn) closeBtn.addEventListener('click', closeScheduleModal);
-		if (cancelBtn) cancelBtn.addEventListener('click', closeScheduleModal);
-		if (nextBtn) nextBtn.addEventListener('click', goToStep2);
-		if (backBtn) backBtn.addEventListener('click', goToStep1);
-		if (saveBtn) saveBtn.addEventListener('click', saveSchedule);
-		if (addScheduleBtn) addScheduleBtn.addEventListener('click', openScheduleModal);
+			if (showTableInputLink) {
+			  showTableInputLink.addEventListener('click', (e) => {
+			    e.preventDefault();
+			    calendarSection.style.display = 'none';
+			    tableInputSection.style.display = 'block';
+			  });
+			}
 			
-		if (monthSelect) {
-		  monthSelect.addEventListener('change', (e) => {
-		    loadMonth(e.target.value);
-		  });
-		}
-		
-		// Modal click outside to close
-		if (modal) {
-		  window.addEventListener('click', (e) => {
-		    if (e.target === modal) {
-		      closeScheduleModal();
-		    }
-		  });
-		}
-		
-		// Inicialização
-		updateUIBasedOnToken(false);
-		
-		const savedToken = localStorage.getItem('githubToken');
-		if (savedToken) {
-		  document.getElementById('tokenInput').value = savedToken;
-		  setTimeout(usarToken, 100);
-		} else {
-		  const monthSelectEl = document.getElementById('month-select');
-		  if (monthSelectEl) {
-		    monthSelectEl.innerHTML = '<option value="">Informe o token primeiro</option>';
-		    monthSelectEl.disabled = true;
-		  }
-		}
-		);
-
+			if (showCalendarLink) {
+			  showCalendarLink.addEventListener('click', (e) => {
+			    e.preventDefault();
+			    tableInputSection.style.display = 'none';
+			    calendarSection.style.display = 'block';
+			  });
+			}
+			
+			
+			  
+			
+			  // Event listeners
+			
+			  if (closeBtn) closeBtn.addEventListener('click', closeScheduleModal);
+			
+			  if (cancelBtn) cancelBtn.addEventListener('click', closeScheduleModal);
+			
+			  if (nextBtn) nextBtn.addEventListener('click', goToStep2);
+			
+			  if (backBtn) backBtn.addEventListener('click', goToStep1);
+			
+			  if (saveBtn) saveBtn.addEventListener('click', saveSchedule);
+			
+			  if (addScheduleBtn) addScheduleBtn.addEventListener('click', openScheduleModal);
+			
+			  
+			
+			  if (monthSelect) {
+			
+			    monthSelect.addEventListener('change', (e) => {
+			
+			      loadMonth(e.target.value);
+			
+			    });
+			
+			  }
+			
+			
+			
+			  // Modal click outside to close
+			
+			  if (modal) {
+			
+			    window.addEventListener('click', (e) => {
+			
+			      if (e.target === modal) {
+			
+			        closeScheduleModal();
+			
+			      }
+			
+			    });
+			
+			  }
+			
+			
+			
+			  // Inicialização
+			
+			  updateUIBasedOnToken(false);
+			
+			
+			
+			  const savedToken = localStorage.getItem('githubToken');
+			
+			  if (savedToken) {
+			
+			    document.getElementById('tokenInput').value = savedToken;
+			
+			    setTimeout(usarToken, 100);
+			
+			  } else {
+			
+			    const monthSelectEl = document.getElementById('month-select');
+			
+			    if (monthSelectEl) {
+			
+			      monthSelectEl.innerHTML = '<option value="">Informe o token primeiro</option>';
+			
+			      monthSelectEl.disabled = true;
+			
+			    }
+			
+			  }
+			
+			});
+			
+			
+			
 		</script>
 		<div id="customPopup" class="custom-popup">
 			<div id="popupContent" class="popup-content">
