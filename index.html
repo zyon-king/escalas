@@ -299,13 +299,13 @@
 			background-color: #f5f5f5;
 			}
 			.toggle-input-link {
-			text-align: center;
+			text-align: right;
 			margin: 15px 0;
 			}
 			.toggle-input-link a {
 			color: #007bff;
 			text-decoration: none;
-			font-size: 16px;
+			font-size: 20px;
 			}
 			.toggle-input-link a:hover {
 			text-decoration: underline;
@@ -565,6 +565,9 @@
 							<select id="schedule-year">
 								<option value="">Selecione o ano</option>
 							</select>
+						</div>
+						<div class="toggle-input-link">
+						  <a href="#" id="delete-schedule-link" style="color: #dc3545;">Excluir escala</a>
 						</div>
 					</div>
 					<div class="modal-buttons">
@@ -1933,72 +1936,51 @@
 			
 			
 			function goToStep2() {
-			
 			  const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
-			
 			  const selectedMonth = document.getElementById('schedule-month').value;
-			
 			  const selectedYear = document.getElementById('schedule-year').value;
 			
-			
-			
 			  if (!selectedPersonRadio) {
-			
 			    showError('Por favor, selecione uma pessoa.');
-			
 			    return;
-			
 			  }
-			
-			
 			
 			  if (!selectedMonth || !selectedYear) {
-			
 			    showError('Por favor, selecione o mês e ano.');
-			
 			    return;
-			
 			  }
-			
-			
 			
 			  function getSelectedDaysFromCalendar() {
-			
 			    const checkboxes = document.querySelectorAll('#editable-calendar-body input[type="checkbox"]:checked');
-			
 			    return Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => a - b);
-			
 			  }
 			
-			
-			
 			  // Carregar dias já salvos se existirem
-			
 			  const person = selectedPersonRadio.value;
-			
 			  const monthKey = `${selectedMonth} ${selectedYear}`;
-			
 			  const existingDays = (schedules[person] && schedules[person][monthKey]) ? schedules[person][monthKey] : [];
-			
 			  
-			
 			  // Construir calendário editável
-			
 			  const year = parseInt(selectedYear);
-			
 			  const monthNumber = getMonthNumber(selectedMonth);
-			
 			  buildEditableCalendar(year, monthNumber, existingDays);
 			
-			
+			  // ADICIONADO: Garantir que o calendário esteja visível e o textarea oculto
+			  const calendarSection = document.getElementById('calendar-section');
+			  const tableInputSection = document.getElementById('table-input-section');
+			  
+			  if (calendarSection) calendarSection.style.display = 'block';
+			  if (tableInputSection) tableInputSection.style.display = 'none';
+			  
+			  // Limpar o textarea para evitar confusão
+			  const scheduleTable = document.getElementById('schedule-table');
+			  if (scheduleTable) scheduleTable.value = '';
 			
 			  // Avançar para step 2
-			
 			  document.getElementById('step1').style.display = 'none';
-			
 			  document.getElementById('step2').style.display = 'block';
-			
 			}
+
 			
 			
 			
@@ -2202,7 +2184,9 @@
 			
 			
 			
-			  showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
+			  // Extrair o mês e o ano do monthKey
+			  const [month, year] = monthKey.split(' ');
+			  showSuccess(`Escala de ${person} para ${month} de ${year}, salva com sucesso!`);
 			
 			  showLoading(false);
 			
@@ -2231,6 +2215,104 @@
 			  const backBtn = document.getElementById('back-btn');
 			
 			  const saveBtn = document.getElementById('save-schedule-btn');
+
+			// Função para atualizar o texto do link de exclusão
+			function updateDeleteLinkText() {
+			  const deleteLink = document.getElementById('delete-schedule-link');
+			  const selectedMonth = document.getElementById('schedule-month').value;
+			  const selectedYear = document.getElementById('schedule-year').value;
+			  
+			  if (deleteLink && selectedMonth && selectedYear) {
+			    deleteLink.textContent = 'Excluir escala de ' + selectedMonth + ' de ' + selectedYear + '?';
+			  } else {
+			    deleteLink.textContent = 'Excluir escala';
+			  }
+			}
+			
+			// Adicione event listeners para os selects de mês e ano
+			const scheduleMonthSelect = document.getElementById('schedule-month');
+			const scheduleYearSelect = document.getElementById('schedule-year');
+			
+			if (scheduleMonthSelect) {
+			  scheduleMonthSelect.addEventListener('change', updateDeleteLinkText);
+			}
+			
+			if (scheduleYearSelect) {
+			  scheduleYearSelect.addEventListener('change', updateDeleteLinkText);
+			}
+			
+			// Também atualize quando o modal for aberto
+			document.getElementById('add-schedule-btn').addEventListener('click', () => {
+			  // Aguarde um momento para os selects serem preenchidos
+			  setTimeout(updateDeleteLinkText, 100);
+			});
+
+				
+			// Link para excluir escala							
+			const deleteScheduleLink = document.getElementById('delete-schedule-link');
+			
+			if (deleteScheduleLink) {
+			  deleteScheduleLink.addEventListener('click', (e) => {
+			    e.preventDefault();
+			    
+			    const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
+			    const selectedMonth = document.getElementById('schedule-month').value;
+			    const selectedYear = document.getElementById('schedule-year').value;
+			    
+			    if (!selectedPersonRadio) {
+			      showError('Por favor, selecione uma pessoa.');
+			      return;
+			    }
+			    
+			    if (!selectedMonth || !selectedYear) {
+			      showError('Por favor, selecione o mês e ano.');
+			      return;
+			    }
+			    
+			    const person = selectedPersonRadio.value;
+			    const monthKey = selectedMonth + ' ' + selectedYear;
+			    
+			    // Verifica se existe escala para esta pessoa/mês
+			    if (schedules[person] && schedules[person][monthKey]) {
+			      showConfirm('Tem certeza que deseja excluir a escala de ' + person + ' para ' + monthKey + '?', async (confirmed) => {
+			        if (confirmed) {
+			          showLoading(true);
+			          try {
+			            // Remove a escala do objeto schedules
+			            delete schedules[person][monthKey];
+			            
+			            // Se não houver mais escalas para esta pessoa, remove a pessoa
+			            if (Object.keys(schedules[person]).length === 0) {
+			              delete schedules[person];
+			            }
+			            
+			            // Salva as alterações no Gist
+			            await saveSchedulesToGist();
+			            
+			            // Atualiza a interface
+			            updateMonthSelect();
+			            const mainMonthSelect = document.getElementById('month-select');
+			            if (mainMonthSelect && mainMonthSelect.options.length > 0) {
+			              mainMonthSelect.selectedIndex = 0;
+			              loadMonth(mainMonthSelect.value);
+			            }
+			            
+			            showSuccess('Escala de ' + person + ' para ' + monthKey + ', excluída com sucesso!');
+			            closeScheduleModal();
+			          } catch (error) {
+			            console.error('Erro ao excluir escala:', error);
+			            showError('Erro ao excluir escala: ' + error.message);
+			          } finally {
+			            showLoading(false);
+			          }
+			        }
+			      });
+			    } else {
+			      showError('Não existe escala para ' + person + ' em ' + monthKey + '.');
+			    }
+			  });
+			}
+
 			
 			
 			// Links para alternar entre calendário e input de tabela
