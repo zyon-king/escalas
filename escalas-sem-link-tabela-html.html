@@ -1,181 +1,92 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Escala de Folgas - Mês Completo</title>
-
   <style>
-
     body {
-
       font-family: Arial, sans-serif;
-
       margin: 20px;
-
     }
-
     h1 {
-
       text-align: center;
-
       margin-bottom: 20px;
-
     }
-
     
-
     /**/
-
     .computer-mode {
-
   	  width: 1000px;
-
   	  margin: 0 auto;
-
   	  font-size: 16px;
-
   	}
-
     .switch {
-
       position: relative;
-
       display: inline-block;
-
       width: 45px;
-
       height: 25px;
-
   	}
-
-
 
   	.switch input {
-
       opacity: 0;
-
       width: 0;
-
       height: 0;
-
   	}
-
-
 
   	.slider {
-
       position: absolute;
-
       cursor: pointer;
-
       top: 0;
-
       left: 0;
-
       right: 0;
-
       bottom: 0;
-
       background-color: #ccc;
-
       transition: 0.4s;
-
   	 }
 
-
-
   	.slider:before {
-
       position: absolute;
-
   	  content: "";
-
   	  height: 19px; /* Ajuste o height da bolinha para ser um pouco menor que o switch */
-
   	  width: 19px; /* Ajuste o width da bolinha para ser igual ao height */
-
   	  left: 3px; /* Ajuste a posição esquerda da bolinha */
-
   	  bottom: 3px; /* Ajuste a posição inferior da bolinha */
-
   	  background-color: white;
-
   	  transition: 0.4s;
-
   	}
-
     
-
 	input:not(:checked) + .slider {
-
 	  background-color: #1abc9c; /* Cor do switch desligado */
-
 	}
-
     
-
     input:checked + .slider {
-
       background-color: #2196F3;
-
     }
-
-
 
     input:focus + .slider {
-
       box-shadow: 0 0 1px #2196F3;
-
     }
-
-
 
     input:checked + .slider:before {
-
       transform: translateX(20px);
-
     }
-
-
 
     .slider.round {
-
       border-radius: 20px;
-
     }
-
-
 
     .slider.round:before {
-
       border-radius: 50%;
-
     }
-
   
-
   	.mode-container {
-
   	  display: flex;
-
   	  align-items: center;
-
   	}
-
 	
-
   	.mode-status {
-
   	  margin-left: 10px;
-
   	  font-size: 16px;
-
   	}
 
     
@@ -2770,118 +2681,137 @@ function goToStep1() {
 
 
 
+// Helper function para obter dias marcados no calendário editável
+// (Pode colocar esta função antes ou depois de saveSchedule, mas fora dela)
+function getSelectedDaysFromCalendar() {
+  const checkboxes = document.querySelectorAll('#editable-calendar-body input[type="checkbox"]:checked');
+  // Garante que os valores sejam números inteiros e ordenados
+  return Array.from(checkboxes).map(cb => parseInt(cb.value)).filter(day => !isNaN(day)).sort((a, b) => a - b);
+}
+
+// Função principal para salvar a escala
 async function saveSchedule() {
-
+  console.log("Função saveSchedule iniciada."); // Log para depuração
   showLoading(true);
-
   try {
-
     const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
-
     const selectedMonth = document.getElementById('schedule-month').value;
-
     const selectedYear = document.getElementById('schedule-year').value;
+    const tableContent = document.getElementById('schedule-table').value.trim(); // Conteúdo do Textarea
 
-    const tableContent = document.getElementById('schedule-table').value.trim();
-
-    let daysOff = [];
-
-    
-
-    // Primeiro tenta pegar do calendário
-
-    const calendarDays = getSelectedDaysFromCalendar();
-
-    if (calendarDays.length > 0) {
-
-      daysOff = calendarDays;
-
-    } else if (tableContent) {
-
-      // Se não há dias selecionados no calendário, tenta processar o textarea
-
-      daysOff = extractDaysOffFromInput(tableContent);
-
-    } else {
-
-      showError('Por favor, marque os dias no calendário ou cole a tabela de escala.');
-
-      showLoading(false);
-
-      return;
-
-    }
-
-
-
+    // --- Validação dos Inputs Iniciais ---
     if (!selectedPersonRadio) {
-
       showError('Por favor, selecione uma pessoa.');
-
       showLoading(false);
-
       return;
-
     }
-
     const person = selectedPersonRadio.value;
 
-
-
     if (!selectedMonth || !selectedYear) {
-
       showError('Por favor, selecione o mês e ano.');
-
       showLoading(false);
-
       return;
-
     }
 
-
-
     const monthKey = `${selectedMonth} ${selectedYear}`;
+    let daysOff = []; // Inicializa array para os dias de folga
 
-    const year = parseInt(selectedYear);
+    // --- Obter Dias de Folga (Prioriza Calendário) ---
+    daysOff = getSelectedDaysFromCalendar();
+    console.log("Dias selecionados no calendário:", daysOff); // Log
 
-    const monthNumber = getMonthNumber(selectedMonth);
-
-
-
-    if (schedules[person] && schedules[person][monthKey]) {
-
-      showConfirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`, (confirmed) => {
-
-        if (!confirmed) {
-
-          showLoading(false);
-
-          return;
-
+    // Se o calendário estiver vazio, tenta o textarea
+    if (daysOff.length === 0 && tableContent) {
+      console.log("Calendário vazio, tentando extrair do textarea:", tableContent); // Log
+      try {
+        daysOff = extractDaysOffFromInput(tableContent);
+        // Garante que o resultado seja um array de números válido
+        if (!Array.isArray(daysOff) || daysOff.some(isNaN)) {
+           console.error('extractDaysOffFromInput não retornou um array de números válido:', daysOff);
+           // Tenta converter strings para números, caso parseScheduleTable retorne strings
+           daysOff = daysOff.map(d => parseInt(d)).filter(d => !isNaN(d));
+           if (daysOff.some(isNaN)) { // Verifica novamente após conversão
+                throw new Error('Formato inválido detectado no campo de texto.');
+           }
         }
+        // Ordena os dias obtidos do texto
+        daysOff.sort((a, b) => a - b);
+        console.log("Dias extraídos do textarea:", daysOff); // Log
+      } catch (parseError) {
+        console.error('Erro ao processar input do textarea:', parseError);
+        showError(`Erro ao processar o texto da escala: ${parseError.message}. Verifique o formato (HTML ou números separados por vírgula).`);
+        showLoading(false);
+        return;
+      }
+    } else if (daysOff.length === 0 && !tableContent) {
+      // Se ambos (calendário e textarea) estiverem vazios
+      console.log("Calendário e textarea vazios."); // Log
+      showError('Por favor, marque os dias de folga no calendário OU cole a escala no campo de texto.');
+      showLoading(false);
+      return;
+    }
 
-        proceedWithSave(person, monthKey, tableContent);
+    // --- Processar Salvamento (Confirmação e Chamada Real) ---
+    const processSaveFlow = async (finalDaysOff) => {
+      console.log(`Prosseguindo para salvar para ${person}, ${monthKey}:`, finalDaysOff); // Log
+      try {
+        // Garante que é um array antes de salvar
+        if (!Array.isArray(finalDaysOff)) {
+             throw new Error("Formato inválido para dias de folga ao tentar salvar.");
+        }
+        await saveScheduleData(person, monthKey, finalDaysOff);
+        // saveScheduleData já cuida de showSuccess e showLoading(false) em caso de sucesso
+      } catch (saveError) {
+        console.error('Erro durante a chamada de saveScheduleData:', saveError);
+        // saveScheduleData deve tratar seu próprio showError, mas adicionamos um fallback
+        showError(`Erro ao salvar a escala: ${saveError.message}`);
+        showLoading(false); // Garante que o loading seja escondido em caso de erro
+      }
+    };
 
-      });
+    // Verifica se já existe escala para esta pessoa/mês
+    const existingSchedule = schedules[person] && schedules[person][monthKey];
 
+    if (existingSchedule) {
+      console.log("Escala existente encontrada:", existingSchedule); // Log
+      // Garante que a escala existente seja um array e esteja ordenada para comparação
+      const currentDaysSorted = Array.isArray(existingSchedule) ? [...existingSchedule].sort((a, b) => a - b) : [];
+      // Garante que os novos dias estejam ordenados (daysOff já deve estar ordenado)
+      const newDaysSorted = [...daysOff].sort((a, b) => a - b);
+
+      // Compara versões stringificadas para ver se há mudanças
+      if (JSON.stringify(currentDaysSorted) === JSON.stringify(newDaysSorted)) {
+        console.log("Nenhuma alteração detectada."); // Log
+        showSuccess("Nenhuma alteração detectada na escala.");
+        showLoading(false);
+        closeScheduleModal(); // Fecha o modal se não houver mudanças
+        return;
+      } else {
+        // Mudanças detectadas, pede confirmação
+        console.log("Mudanças detectadas, pedindo confirmação."); // Log
+        showConfirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`, (confirmed) => {
+          if (confirmed) {
+            console.log("Usuário confirmou a substituição."); // Log
+            processSaveFlow(daysOff); // Passa o array daysOff com os novos dias
+          } else {
+            console.log("Usuário cancelou a substituição."); // Log
+            showLoading(false); // Esconde o loading se o usuário cancelar
+          }
+        });
+      }
     } else {
-
-      proceedWithSave(person, monthKey, tableContent);
-
+      // Nenhuma escala existente, salva diretamente
+      console.log("Nenhuma escala existente, salvando diretamente."); // Log
+      processSaveFlow(daysOff); // Passa o array daysOff com os novos dias
     }
 
   } catch (error) {
-
-    console.error('Erro detalhado ao salvar escala:', error);
-
+    // Captura erros inesperados no bloco try principal
+    console.error('Erro inesperado na função saveSchedule:', error);
+    showError(`Ocorreu um erro inesperado: ${error.message}`);
+    showLoading(false);
   }
-
 }
-
-
-
-
-
 
 
 async function saveScheduleData(person, monthKey, daysOff) {
