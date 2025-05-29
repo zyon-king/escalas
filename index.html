@@ -305,7 +305,7 @@
 			.toggle-input-link a {
 			color: #007bff;
 			text-decoration: none;
-			font-size: 20px;
+			font-size: 16px;
 			}
 			.toggle-input-link a:hover {
 			text-decoration: underline;
@@ -1693,95 +1693,70 @@
 			
 			// --- Funções do Modal --- 
 			
-			
-			
 			function openScheduleModal() {
-			
 			  const modal = document.getElementById('scheduleModal');
-			
 			  if (!modal) return;
 			
-			
-			
 			  // Reset steps
-			
 			  document.getElementById('step1').style.display = 'block';
-			
 			  document.getElementById('step2').style.display = 'none';
 			
-			
-			
 			  const monthSelect = document.getElementById('schedule-month');
-			
 			  const yearSelect = document.getElementById('schedule-year');
 			
-			
-			
 			  if (!monthSelect || !yearSelect) {
-			
 			      console.error("Elementos select de mês/ano do modal não encontrados!");
-			
 			      return;
-			
 			  }
-			
-			
 			
 			  monthSelect.innerHTML = '<option value="">Selecione o mês</option>';
-			
 			  yearSelect.innerHTML = '<option value="">Selecione o ano</option>';
 			
-			
-			
-			  const currentMonthNum = new Date().getMonth();
-			
+			  // Obter o mês atual
+			  const currentDate = new Date();
+			  const currentMonthNum = currentDate.getMonth(); // 0-11 (janeiro-dezembro)
+			  
+			  // Preencher as opções de mês
 			  for (let i = 0; i < 12; i++) {
-			
 			    const option = document.createElement('option');
-			
 			    option.value = getMonthName(i);
-			
 			    option.text = getMonthName(i);
-			
 			    monthSelect.appendChild(option);
-			
 			  }
-			
+			  
+			  // Definir o mês atual como selecionado
 			  monthSelect.value = getMonthName(currentMonthNum);
 			
-			
-			
-			  const currentYearNum = new Date().getFullYear();
-			
+			  // Obter o ano atual
+			  const currentYearNum = currentDate.getFullYear();
+			  
+			  // Preencher as opções de ano
 			  for (let year = currentYearNum; year <= currentYearNum + 2; year++) {
-			
 			    const option = document.createElement('option');
-			
 			    option.value = year;
-			
 			    option.text = year;
-			
 			    yearSelect.appendChild(option);
-			
 			  }
+			  
+			  // Definir o ano atual como selecionado
+			  yearSelect.value = currentYearNum;
 			
-			   yearSelect.value = currentYearNum;
-			
-			
-			
+			  // Limpar seleção de pessoa
 			  document.querySelectorAll('input[name="pessoa"]').forEach(radio => radio.checked = false);
 			
-			
-			
+			  // Limpar textarea
 			  const scheduleTableTextarea = document.getElementById('schedule-table');
-			
 			  if (scheduleTableTextarea) scheduleTableTextarea.value = '';
 			
+			  // Atualizar o texto do link de exclusão (se a função existir)
+			  if (typeof updateDeleteLinkText === 'function') {
+			    setTimeout(updateDeleteLinkText, 100);
+			  }
 			
-			
+			  // Exibir o modal
 			  modal.style.display = 'block';
-			
 			}
+
 			
 			
 			
