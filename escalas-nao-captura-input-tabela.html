@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Escala de Folgas - Mês Completo</title>
+		<style>
+			body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+			}
+			h1 {
+			text-align: center;
+			margin-bottom: 20px;
+			}
+			/**/
+			.computer-mode {
+			width: 1000px;
+			margin: 0 auto;
+			font-size: 16px;
+			}
+			.switch {
+			position: relative;
+			display: inline-block;
+			width: 45px;
+			height: 25px;
+			}
+			.switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+			}
+			.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #ccc;
+			transition: 0.4s;
+			}
+			.slider:before {
+			position: absolute;
+			content: "";
+			height: 19px; /* Ajuste o height da bolinha para ser um pouco menor que o switch */
+			width: 19px; /* Ajuste o width da bolinha para ser igual ao height */
+			left: 3px; /* Ajuste a posição esquerda da bolinha */
+			bottom: 3px; /* Ajuste a posição inferior da bolinha */
+			background-color: white;
+			transition: 0.4s;
+			}
+			input:not(:checked) + .slider {
+			background-color: #1abc9c; /* Cor do switch desligado */
+			}
+			input:checked + .slider {
+			background-color: #2196F3;
+			}
+			input:focus + .slider {
+			box-shadow: 0 0 1px #2196F3;
+			}
+			input:checked + .slider:before {
+			transform: translateX(20px);
+			}
+			.slider.round {
+			border-radius: 20px;
+			}
+			.slider.round:before {
+			border-radius: 50%;
+			}
+			.mode-container {
+			display: flex;
+			align-items: center;
+			}
+			.mode-status {
+			margin-left: 10px;
+			font-size: 16px;
+			}
+			/**/
+			.token {
+			text-align: center;
+			margin-bottom: 20px;
+			}
+			.token button {
+			padding: 15px 30px;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-weight: 600;
+			font-size: 20px;
+			min-width: 120px;
+			}	  
+			.token button:hover {
+			background-color: #0056b3;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+			}
+			.token input {
+			text-align: center;
+			width: 700px;
+			max-width: 90%;
+			height: 50px;
+			margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
+			}
+			.controls {
+			text-align: center;
+			margin-bottom: 20px;
+			}
+			.controls select {
+			padding: 12px 16px;
+			margin-right: 10px;
+			border: 2px solid #e0e0e0;
+			border-radius: 8px;
+			background-color: white;
+			font-size: 16px;
+			font-weight: 500;
+			transition: all 0.3s ease;
+			min-width: 180px;
+			margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
+			}
+			.controls select:focus {
+			border-color: #007bff;
+			outline: none;
+			box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+			}
+			.controls button {
+			padding: 12px 25px;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-weight: 600;
+			font-size: 20px;
+			min-width: 140px;
+			}
+			.controls button:hover {
+			background-color: #0056b3;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+			}
+			/* Modal styles */
+			.modal {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0,0,0,0.5);
+			}
+			.modal-content {
+			background-color: white;
+			margin: 1% auto;
+			padding: 20px;
+			border-radius: 8px;
+			width: 90%;
+			max-width: 750px; /* Remova o limite de largura máximo */
+			max-height: 95vh;
+			overflow-y: auto;
+			}
+			.modal-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			border-bottom: 1px solid #eee;
+			padding-bottom: 10px;
+			}
+			.close {
+			color: #aaa;
+			font-size: 28px;
+			font-weight: bold;
+			cursor: pointer;
+			}
+			.close:hover {
+			color: #000;
+			}
+			.form-group {
+			margin-bottom: 15px;
+			}
+			.form-group label {
+			display: block;
+			margin-bottom: 5px;
+			}
+			.person-selection label, .date-selection label {
+			font-weight: bold;
+			font-size: 18px; /* Aumente o tamanho da fonte */
+			}
+			#scheduleModal label {
+			font-size: 30px; /* Aumente o tamanho da fonte */
+			}
+			.form-group input, .form-group select, .form-group textarea {
+			width: 100%;
+			padding: 12px; /* Aumente o espaçamento interno */
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+			font-size: 20px; /* Aumente o tamanho da fonte */
+			}
+			.form-group textarea {
+			height: 150px;
+			resize: vertical;
+			}
+			.person-selection {
+			display: flex;
+			gap: 20px;
+			margin-bottom: 15px;
+			}
+			.person-option {
+			display: flex;
+			align-items: center; /* Garante alinhamento vertical */
+			gap: 8px;
+			}
+			.person-option input[type="radio"] {
+			width: 20px; /* 25px pode ser grande demais para alinhar com texto */
+			height: 20px;
+			margin: 0;
+			vertical-align: middle; /* importante */
+			}
+			.date-selection {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 15px;
+			}
+			.date-selection select {
+			flex: 1;
+			}
+			.modal-buttons button {
+			padding: 15px 30px;
+			margin-right: 30px;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 20px;
+			transition: all 0.3s ease;
+			font-weight: 600;
+			min-width: 120px;
+			margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
+			}
+			.modal-step {
+			min-height: 200px;
+			}
+			.modal-step.hidden {
+			display: none !important;
+			}
+			.btn-primary {
+			background-color: #007bff;
+			color: white;
+			}
+			.btn-primary:hover {
+			background-color: #0056b3;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+			}
+			.btn-secondary {
+			background-color: #6c757d;
+			color: white;
+			}
+			.btn-secondary:hover {
+			background-color: #5a6268;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+			}
+			.editable-calendar {
+			margin: 20px 0;
+			}
+			.editable-calendar table {
+			width: 100%;
+			max-width: 500px;
+			margin: 0 auto;
+			}
+			.day-checkbox {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 5px;
+			}
+			.day-checkbox input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			margin: 0;
+			}
+			.day-checkbox label {
+			font-size: 14px;
+			cursor: pointer;
+			margin: 0;
+			}
+			.editable-calendar td {
+			padding: 10px 5px;
+			text-align: center;
+			}
+			.editable-calendar .empty {
+			background-color: #f5f5f5;
+			}
+			.toggle-input-link {
+			text-align: center;
+			margin: 15px 0;
+			}
+			.toggle-input-link a {
+			color: #007bff;
+			text-decoration: none;
+			font-size: 16px;
+			}
+			.toggle-input-link a:hover {
+			text-decoration: underline;
+			color: #0056b3;
+			}
+			table {
+			padding: 8px 4px;
+			width: 850px;
+			margin: auto;
+			border-collapse: collapse;
+			table-layout: fixed;
+			}
+			th, td {
+			border: 1px solid #ccc;
+			text-align: center;
+			padding: 8px 4px;
+			vertical-align: top;
+			word-wrap: break-word;
+			}
+			th {
+			background-color: #007bff;
+			color: white;
+			}
+			.weekend {
+			background-color: #d4edda; /* verde claro */
+			color: #155724; /* texto verde escuro */
+			}
+			.workday {
+			background-color: #d4edda;
+			color: #155724;
+			}
+			.cris-day-off {
+			background-color: #FFC0CB; /* rosa claro */
+			}
+			.clei-day-off {
+			background-color: #b8daff; /* azul claro */
+			}
+			.person-name {
+			font-weight: bold;
+			}
+			.loading {
+			text-align: center;
+			padding: 20px;
+			color: #666;
+			}
+			.alert {
+			position: relative;
+			z-index: 10000;
+			text-align: center;
+			padding: 20px;
+			border-radius: 4px;
+			margin: 20px 0;
+			}
+			.error {
+			background-color: #f8d7da;
+			color: #d63384;
+			border: 1px solid #f5c2c7;
+			}
+			.success {
+			background-color: #ADD8E6;
+			color: #000;
+			}
+			/* Estilos para popups customizados */
+			#customPopup {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			}
+			.popup-content {
+			background-color: white;
+			margin: 50px auto 0 auto;
+			padding: 20px;
+			border-radius: 8px;
+			width: 90%;
+			max-width: 400px;
+			text-align: center;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+			position: relative;
+			top: 20px;
+			}
+			@keyframes popupSlideIn {
+			from {
+			opacity: 0;
+			transform: translate(-50%, -60%);
+			}
+			to {
+			opacity: 1;
+			transform: translate(-50%, -50%);
+			}
+			}
+			.popup-content.success {
+			background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+			}
+			.popup-content.error {
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+			}
+			.popup-content.confirm {
+			background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+			}
+			.popup-icon {
+			font-size: 48px;
+			margin-bottom: 15px;
+			display: block;
+			}
+			.popup-title {
+			font-size: 22px;
+			font-weight: bold;
+			margin-bottom: 15px;
+			color: white;
+			}
+			.popup-content.confirm .popup-title {
+			color: #333;
+			}
+			.popup-message {
+			font-size: 30px;
+			line-height: 1.5;
+			margin-bottom: 25px;
+			color: white;
+			}
+			.popup-content.confirm .popup-message {
+			color: #555;
+			}
+			.popup-buttons {
+			display: flex;
+			justify-content: center;
+			gap: 15px;
+			}
+			.popup-btn {
+			padding: 12px 25px;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-weight: 600;
+			min-width: 100px;
+			}
+			.popup-btn-primary {
+			background-color: #007bff;
+			color: white;
+			}
+			.popup-btn-primary:hover {
+			background-color: #0056b3;
+			transform: translateY(-2px);
+			}
+			.popup-btn-secondary {
+			background-color: #6c757d;
+			color: white;
+			}
+			.popup-btn-secondary:hover {
+			background-color: #5a6268;
+			transform: translateY(-2px);
+			}
+			.popup-btn-success {
+			background-color: #28a745;
+			color: white;
+			}
+			.popup-btn-success:hover {
+			background-color: #218838;
+			transform: translateY(-2px);
+			}
+			@media only screen and (max-width: 768px) {
+			#calendar-body td {
+			font-size: 12px; /* Defina o tamanho da fonte desejado */
+			}
+			table {
+			width: 100%;
+			font-size: 16px; /* Ajuste o tamanho da fonte para melhor legibilidade */
+			}
+			table thead th {
+			font-size: 11px; /* Defina o tamanho da fonte  */
+			padding: 5px; /* Ajuste o espaçamento entre células */
+			}
+			th, td {
+			padding: 10px; /* Ajuste o espaçamento entre células */
+			}
+			.controls {
+			width: 100%; /* Ocupa toda a largura da tela */
+			padding: 10px; /* Ajuste o espaçamento */
+			}
+			.token {
+			width: 100%; /* Ocupa toda a largura da tela */
+			padding: 10px; /* Ajuste o espaçamento */
+			}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mode-container">
+			<label class="switch">
+			<input type="checkbox" id="mode-toggle">
+			<span class="slider round"></span>
+			</label>
+			<span class="mode-status" id="mode-status">Mode</span>
+		</div>
+		<h1>Escala de Folgas</h1>
+		<div class="token">
+			<input type="password" id="tokenInput" placeholder="Insira o token">
+			<button onclick="usarToken()" id="executar-btn">Executar</button>
+		</div>
+		<div class="controls">
+			<select id="month-select">
+				<option value="">Carregando...</option>
+			</select>
+			<button id="add-schedule-btn">Editar Folgas</button>
+		</div>
+		<div id="loading" class="loading" style="display: none;">Carregando dados...</div>
+		<div id="error" class="error" style="display: none;"></div>
+		<table>
+			<thead>
+				<tr>
+					<th>Dom</th>
+					<th>Seg</th>
+					<th>Ter</th>
+					<th>Qua</th>
+					<th>Qui</th>
+					<th>Sex</th>
+					<th>Sáb</th>
+				</tr>
+			</thead>
+			<tbody id="calendar-body">
+			</tbody>
+		</table>
+		<!-- Modal para adicionar escala -->
+		<div id="scheduleModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Editar Folgas</h2>
+					<span class="close">&times;</span>
+				</div>
+				<!-- Primeira etapa: Seleção de dados -->
+				<div id="step1" class="modal-step">
+					<div class="form-group">
+						<label>Selecione a pessoa:</label>
+						<div class="person-selection">
+							<div class="person-option">
+								<input type="radio" id="cris" name="pessoa" value="Cris">
+								<label for="cris">Cris</label>
+							</div>
+							<div class="person-option">
+								<input type="radio" id="clei" name="pessoa" value="Clei">
+								<label for="clei">Clei</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Período da escala:</label>
+						<div class="date-selection">
+							<select id="schedule-month">
+								<option value="">Selecione o mês</option>
+							</select>
+							<select id="schedule-year">
+								<option value="">Selecione o ano</option>
+							</select>
+						</div>
+					</div>
+					<div class="modal-buttons">
+						<button class="btn-secondary" id="cancel-btn">Cancelar</button>
+						<button class="btn-primary" id="next-btn">Avançar</button>
+					</div>
+				</div>
+				<!-- Segunda etapa: Input das folgas -->
+				<div id="step2" class="modal-step" style="display: none;">
+					<!-- Seção do calendário (visível por padrão) -->
+					<div id="calendar-section">
+						<div class="form-group">
+							<label>Marque os dias de folga no calendário:</label>
+							<div class="editable-calendar">
+								<table>
+									<thead>
+										<tr>
+											<th>Dom</th>
+											<th>Seg</th>
+											<th>Ter</th>
+											<th>Qua</th>
+											<th>Qui</th>
+											<th>Sex</th>
+											<th>Sáb</th>
+										</tr>
+									</thead>
+									<tbody id="editable-calendar-body">
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="toggle-input-link">
+							<a href="#" id="show-table-input">Prefere colar tabela HTML?</a>
+						</div>
+					</div>
+					<!-- Seção do textarea (oculta por padrão) -->
+					<div id="table-input-section" style="display: none;">
+						<div class="form-group">
+							<label for="schedule-table">Cole a tabela HTML da escala ou sequência separada por ",":</label>
+							<textarea id="schedule-table" placeholder="Cole aqui a tabela HTML da escala..."></textarea>
+						</div>
+						<div class="toggle-input-link">
+							<a href="#" id="show-calendar">Prefere usar o calendário?</a>
+						</div>
+					</div>
+					<div class="modal-buttons">
+						<button class="btn-secondary" id="back-btn">Voltar</button>
+						<button class="btn-primary" id="save-schedule-btn">Salvar Escala</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const addScheduleBtn = document.getElementById('add-schedule-btn');
+			
+			const monthSelect = document.getElementById('month-select');
+			
+			const closeBtn = document.querySelector('.close');
+			
+			const cancelBtn = document.getElementById('cancel-btn');
+			
+			const gistId = 'b996dc535ebcc23c8b45f8979b4d86e0';
+			
+			const filename = 'escalas_trabalho.json';
+			
+			
+			
+			const people = ['Cris', 'Clei'];
+			
+			const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+			
+			let currentMonth = null;
+			
+			let currentYear = null;
+			
+			let schedules = {};
+			
+			let token = '';
+			
+			
+			
+			// --- Funções de Interação com UI --- 
+			
+			
+			
+			
+			
+			// Start of computer mode function
+			
+			const modeToggle = document.getElementById('mode-toggle');
+			
+			const modeStatus = document.getElementById('mode-status');
+			
+			
+			
+			// Verifica se o modo computador está ativado inicialmente
+			
+			if (document.body.classList.contains('computer-mode')) {
+			
+			  modeToggle.checked = true;
+			
+			  modeStatus.textContent = 'Modo Computador ON';
+			
+			} else {
+			
+			  modeStatus.textContent = 'Modo Mobile ON';
+			
+			}
+			
+			
+			
+			modeToggle.addEventListener('change', () => {
+			
+			  if (modeToggle.checked) {
+			
+			    document.body.classList.add('computer-mode');
+			
+			    modeStatus.textContent = 'Modo Computador ON';
+			
+			  } else {
+			
+			    document.body.classList.remove('computer-mode');
+			
+			    modeStatus.textContent = 'Modo Mobile ON';
+			
+			  }
+			
+			});
+			
+			// End of computer mode function
+			
+			
+			
+			function showLoading(show) {
+			
+			  const loadingDiv = document.getElementById('loading');
+			
+			  if (loadingDiv) {
+			
+			    loadingDiv.style.display = show ? 'block' : 'none';
+			
+			  }
+			
+			}
+			
+			
+			
+			function updateUIBasedOnToken(isValid) {
+			
+			    const tokenDiv = document.querySelector('.token');
+			
+			    const controlsDiv = document.querySelector('.controls');
+			
+			    const calendarTable = document.querySelector('table');
+			
+			
+			
+			    if (isValid) {
+			
+			        if (tokenDiv) tokenDiv.style.display = 'none';
+			
+			        if (controlsDiv) controlsDiv.style.display = 'block';
+			
+			        if (calendarTable) calendarTable.style.display = 'table';
+			
+			    } else {
+			
+			        if (tokenDiv) tokenDiv.style.display = 'block';
+			
+			        if (controlsDiv) controlsDiv.style.display = 'none';
+			
+			        if (calendarTable) calendarTable.style.display = 'none';
+			
+			    }
+			
+			}
+			
+			
+			
+			// --- Funções de Lógica e API --- 
+			
+			
+			
+			function usarToken() {
+			
+			  token = document.getElementById('tokenInput').value;
+			
+			  if (token) {
+			
+			    verificarToken()
+			
+			    .then(tokenValido => {
+			
+			      if (tokenValido) {
+			
+			        localStorage.setItem('githubToken', token);
+			
+			        loadSchedules();
+			
+			        verificarTokenPeriodicamente();
+			
+			        updateUIBasedOnToken(true);
+			
+			      } else {
+			
+			        localStorage.removeItem('githubToken');
+			
+			        showError('Token inválido. Por favor, verifique o token informado.');
+			
+			        updateUIBasedOnToken(false);
+			
+			      }
+			
+			    });
+			
+			  } else {
+			
+			    localStorage.removeItem('githubToken');
+			
+			    showError('Por favor, informe o token.');
+			
+			    updateUIBasedOnToken(false);
+			
+			  }
+			
+			}
+			
+			
+			
+			let tokenCheckIntervalId = null;
+			
+			
+			
+			function verificarTokenPeriodicamente() {
+			
+			  if (tokenCheckIntervalId) clearInterval(tokenCheckIntervalId);
+			
+			
+			
+			  tokenCheckIntervalId = setInterval(async () => {
+			
+			    if (!token) {
+			
+			        clearInterval(tokenCheckIntervalId);
+			
+			        tokenCheckIntervalId = null;
+			
+			        return;
+			
+			    }
+			
+			    try {
+			
+			      const response = await fetch('https://api.github.com/user', {
+			
+			        headers: {
+			
+			          'Authorization': `Bearer ${token}`,
+			
+			          'Accept': 'application/vnd.github.v3+json'
+			
+			        }
+			
+			      });
+			
+			
+			
+			      if (!response.ok) {
+			
+			        mostrarMensagemTokenExpirado();
+			
+			        clearInterval(tokenCheckIntervalId);
+			
+			        tokenCheckIntervalId = null;
+			
+			        updateUIBasedOnToken(false);
+			
+			      }
+			
+			    } catch (error) {
+			
+			      console.error('Erro ao verificar token periodicamente:', error);
+			
+			    }
+			
+			  }, 5 * 60 * 1000);
+			
+			}
+			
+			
+			
+			function mostrarMensagemTokenExpirado() {
+			
+			  showError('Token expirado ou inválido. Por favor, informe um novo token.');
+			
+			}
+			
+			
+			
+			function verificarToken() {
+			
+			  showLoading(true);
+			
+			  return fetch('https://api.github.com/user', {
+			
+			    headers: {
+			
+			      'Authorization': `Bearer ${token}`,
+			
+			      'Accept': 'application/vnd.github.v3+json'
+			
+			    }
+			
+			  })
+			
+			  .then(response => response.ok)
+			
+			  .catch(error => {
+			
+			    console.error('Erro ao verificar token:', error);
+			
+			    showError('Erro de rede ao verificar o token.');
+			
+			    return false;
+			
+			  })
+			
+			  .finally(() => showLoading(false));
+			
+			}
+			
+			
+			
+			function buildCalendar(year, month) {
+			
+			  if (!token) {
+			
+			    showError('Token não definido. Por favor, informe o token.');
+			
+			    return;
+			
+			  }
+			
+			
+			
+			  const calendarBody = document.getElementById('calendar-body');
+			
+			  if (!calendarBody) {
+			
+			    console.error("Elemento 'calendar-body' não encontrado!");
+			
+			    return;
+			
+			  }
+			
+			  
+			
+			  calendarBody.innerHTML = '';
+			
+			
+			
+			  const firstDayOfMonth = new Date(year, month, 1);
+			
+			  const lastDayOfMonth = new Date(year, month + 1, 0);
+			
+			  const daysInMonth = lastDayOfMonth.getDate();
+			
+			  const startDayOfWeek = firstDayOfMonth.getDay();
+			
+			
+			
+			  const monthKey = `${getMonthName(month)} ${year}`;
+			
+			
+			
+			  let date = 1;
+			
+			  
+			
+			  // Loop para criar as semanas (máximo 6 semanas)
+			
+			  for (let week = 0; week < 6; week++) {
+			
+			    const row = document.createElement('tr');
+			
+			    
+			
+			    // Loop para criar os 7 dias da semana
+			
+			    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+			
+			      const cell = document.createElement('td');
+			
+			      
+			
+			      // Se é a primeira semana e ainda não chegou no primeiro dia do mês
+			
+			      if (week === 0 && dayOfWeek < startDayOfWeek) {
+			
+			        cell.classList.add('empty');
+			
+			      }
+			
+			      // Se já passou do último dia do mês
+			
+			      else if (date > daysInMonth) {
+			
+			        cell.classList.add('empty');
+			
+			      }
+			
+			      // Dia válido do mês
+			
+			      else {
+			
+			        let cellContent = `<div class="day-title">${date}</div>`;
+			
+			        
+			
+			        people.forEach(person => {
+			
+			          let status = '';
+			
+			          let className = 'workday';
+			
+			          
+			
+			          if (schedules[person] && schedules[person][monthKey]) {
+			
+			            const dayOffList = schedules[person][monthKey];
+			
+			            if (dayOffList.includes(date)) {
+			
+			              status = '';
+			
+			              className = person.toLowerCase().replace(' ', '-') + '-day-off';
+			
+			              cellContent += `<div class="${className}"><span class="person-name">${person}</span> ${status}</div>`;
+			
+			            }
+			
+			          }
+			
+			        });
+			
+			        
+			
+			        cell.innerHTML = cellContent;
+			
+			        date++;
+			
+			      }
+			
+			      
+			
+			      row.appendChild(cell);
+			
+			    }
+			
+			    
+			
+			    calendarBody.appendChild(row);
+			
+			    
+			
+			    // Se já processamos todos os dias do mês, podemos parar
+			
+			    if (date > daysInMonth) {
+			
+			      break;
+			
+			    }
+			
+			  }
+			
+			}
+			
+			
+			
+			function buildEditableCalendar(year, month, selectedDays = []) {
+			
+			  const editableCalendarBody = document.getElementById('editable-calendar-body');
+			
+			  if (!editableCalendarBody) return;
+			
+			  
+			
+			  editableCalendarBody.innerHTML = '';
+			
+			
+			
+			  const firstDayOfMonth = new Date(year, month, 1);
+			
+			  const lastDayOfMonth = new Date(year, month + 1, 0);
+			
+			  const daysInMonth = lastDayOfMonth.getDate();
+			
+			  const startDayOfWeek = firstDayOfMonth.getDay();
+			
+			
+			
+			  let date = 1;
+			
+			  
+			
+			  for (let week = 0; week < 6; week++) {
+			
+			    const row = document.createElement('tr');
+			
+			    
+			
+			    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+			
+			      const cell = document.createElement('td');
+			
+			      
+			
+			      if (week === 0 && dayOfWeek < startDayOfWeek) {
+			
+			        cell.classList.add('empty');
+			
+			      }
+			
+			      else if (date > daysInMonth) {
+			
+			        cell.classList.add('empty');
+			
+			      }
+			
+			      else {
+			
+			        cell.innerHTML = `
+			
+			          <div class="day-checkbox">
+			
+			            <input type="checkbox" id="day-${date}" value="${date}" ${selectedDays.includes(date) ? 'checked' : ''}>
+			
+			            <label for="day-${date}">${date}</label>
+			
+			          </div>
+			
+			        `;
+			
+			        date++;
+			
+			      }
+			
+			      
+			
+			      row.appendChild(cell);
+			
+			    }
+			
+			    
+			
+			    editableCalendarBody.appendChild(row);
+			
+			    
+			
+			    if (date > daysInMonth) {
+			
+			      break;
+			
+			    }
+			
+			  }
+			
+			}
+			
+			
+			
+			function getMonthNumber(monthName) {
+			
+			  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+			
+			  return monthNames.indexOf(monthName);
+			
+			}
+			
+			
+			
+			function getMonthName(monthNumber) {
+			
+			  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+			
+			  if (monthNumber >= 0 && monthNumber < 12) {
+			
+			      return monthNames[monthNumber];
+			
+			  }
+			
+			  return '';
+			
+			}
+			
+			
+			
+			async function loadSchedules() {
+			
+			  try {
+			
+			    showLoading(true);
+			
+			    schedules = {};
+			
+			
+			
+			    const response = await fetch(`https://api.github.com/gists/${gistId}`);
+			
+			
+			
+			    if (!response.ok) {
+			
+			      if (response.status === 404) {
+			
+			         console.warn(`Gist ${gistId} não encontrado. Iniciando com dados vazios.`);
+			
+			      } else {
+			
+			          throw new Error(`Erro ao carregar gist: ${response.status}`);
+			
+			      }
+			
+			    } else {
+			
+			        const gist = await response.json();
+			
+			        const file = gist.files[filename];
+			
+			
+			
+			        if (file && file.content && file.content.trim()) {
+			
+			          try {
+			
+			            schedules = JSON.parse(file.content);
+			
+			            console.log("Escalas carregadas:", schedules);
+			
+			          } catch (parseError) {
+			
+			            console.error('Erro ao fazer parse das escalas:', parseError);
+			
+			            showError('Erro ao ler os dados de escala salvos. Verifique o formato no Gist.');
+			
+			          }
+			
+			        } else {
+			
+			            console.log("Arquivo de escalas vazio ou não encontrado no Gist. Iniciando com dados vazios.");
+			
+			        }
+			
+			    }
+			
+			
+			
+			    updateMonthSelect();
+			
+			
+			
+			    const monthSelect = document.getElementById('month-select');
+			
+			    let monthToLoad = monthSelect.value;
+			
+			
+			
+			    if (!monthToLoad) {
+			
+			        const date = new Date();
+			
+			        const currentMonthName = getMonthName(date.getMonth());
+			
+			        const currentYearNum = date.getFullYear();
+			
+			        monthToLoad = `${currentMonthName} ${currentYearNum}`;
+			
+			        
+			
+			        if (!Array.from(monthSelect.options).some(opt => opt.value === monthToLoad)) {
+			
+			            const option = document.createElement('option');
+			
+			            option.value = monthToLoad;
+			
+			            option.text = monthToLoad;
+			
+			            if (monthSelect.options.length > 1) {
+			
+			                monthSelect.insertBefore(option, monthSelect.options[1]);
+			
+			            } else {
+			
+			                monthSelect.appendChild(option);
+			
+			            }
+			
+			        }
+			
+			        monthSelect.value = monthToLoad;
+			
+			    }
+			
+			    
+			
+			    loadMonth(monthToLoad);
+			
+			
+			
+			  } catch (error) {
+			
+			    console.error('Erro ao carregar escalas:', error);
+			
+			    showError(`Erro ao carregar dados do Gist: ${error.message}`);
+			
+			    schedules = {};
+			
+			    updateMonthSelect();
+			
+			    loadMonth(null);
+			
+			  } finally {
+			
+			    showLoading(false);
+			
+			  }
+			
+			}
+			
+			
+			
+			function updateMonthSelect() {
+			
+			  const monthSelect = document.getElementById('month-select');
+			
+			  if (!monthSelect) return;
+			
+			  const currentSelection = monthSelect.value;
+			
+			  monthSelect.innerHTML = '';
+			
+			
+			
+			  const defaultOption = document.createElement('option');
+			
+			  defaultOption.value = '';
+			
+			  defaultOption.text = 'Selecione o Mês/Ano';
+			
+			  defaultOption.disabled = true;
+			
+			  monthSelect.appendChild(defaultOption);
+			
+			
+			
+			  const months = new Set();
+			
+			  Object.values(schedules).forEach(personSchedules => {
+			
+			    if (personSchedules) {
+			
+			        Object.keys(personSchedules).forEach(monthKey => {
+			
+			            months.add(monthKey);
+			
+			        });
+			
+			    }
+			
+			  });
+			
+			
+			
+			  const date = new Date();
+			
+			  const currentMonthKey = `${getMonthName(date.getMonth())} ${date.getFullYear()}`;
+			
+			  months.add(currentMonthKey);
+			
+			
+			
+			  const sortedMonths = Array.from(months).sort((a, b) => {
+			
+			    const [monthA, yearA] = a.split(' ');
+			
+			    const [monthB, yearB] = b.split(' ');
+			
+			    const dateA = new Date(parseInt(yearA), getMonthNumber(monthA));
+			
+			    const dateB = new Date(parseInt(yearB), getMonthNumber(monthB));
+			
+			    if (!isNaN(dateA) && !isNaN(dateB)) {
+			
+			        return dateA - dateB;
+			
+			    }
+			
+			    return 0;
+			
+			  });
+			
+			
+			
+			  sortedMonths.forEach(month => {
+			
+			    const option = document.createElement('option');
+			
+			    option.value = month;
+			
+			    option.text = month;
+			
+			    monthSelect.appendChild(option);
+			
+			  });
+			
+			
+			
+			  if (sortedMonths.includes(currentSelection)) {
+			
+			      monthSelect.value = currentSelection;
+			
+			  } else if (sortedMonths.includes(currentMonthKey)) {
+			
+			      monthSelect.value = currentMonthKey;
+			
+			  } else if (sortedMonths.length > 0) {
+			
+			      monthSelect.value = sortedMonths[0]; 
+			
+			  } else {
+			
+			      monthSelect.value = ''; 
+			
+			  }
+			
+			  monthSelect.disabled = monthSelect.options.length <= 1;
+			
+			}
+			
+			
+			
+			function loadMonth(monthYearString) {
+			
+			  const calendarBody = document.getElementById('calendar-body');
+			
+			  if (!calendarBody) return;
+			
+			
+			
+			  if (!monthYearString) {
+			
+			      calendarBody.innerHTML = '';
+			
+			      currentMonth = null;
+			
+			      currentYear = null;
+			
+			      return;
+			
+			  }
+			
+			  const parts = monthYearString.split(' ');
+			
+			  if (parts.length !== 2) {
+			
+			      showError('Formato de mês/ano inválido na seleção.');
+			
+			      return;
+			
+			  }
+			
+			  const [monthName, yearStr] = parts;
+			
+			  const monthNumber = getMonthNumber(monthName);
+			
+			  const year = parseInt(yearStr);
+			
+			
+			
+			  if (monthNumber === -1 || isNaN(year)) {
+			
+			    showError('Mês ou ano inválido na seleção.');
+			
+			    return;
+			
+			  }
+			
+			
+			
+			  currentMonth = monthNumber;
+			
+			  currentYear = year;
+			
+			
+			
+			  console.log(`Carregando calendário para: ${monthName} ${year}`);
+			
+			  buildCalendar(currentYear, currentMonth);
+			
+			}
+			
+			
+			
+			// *** FUNÇÃO CORRIGIDA - v3 ***
+			
+			    function parseScheduleTable(htmlTable) {
+			
+			      // Aqui vai a implementação da função parseScheduleTable
+			
+			      const tabela = document.createElement('table');
+			
+			      tabela.innerHTML = htmlTable;
+			
+			      const linhas = tabela.getElementsByTagName('tr');
+			
+			      const diasDeFolga = [];
+			
+			
+			
+			      let mesAtual = null;
+			
+			
+			
+			      for (let i = 0; i < linhas.length; i++) {
+			
+			        const linha = linhas[i];
+			
+			        const celulas = linha.getElementsByTagName('td');
+			
+			
+			
+			        for (let j = 0; j < celulas.length; j++) {
+			
+			          const celula = celulas[j];
+			
+			          let dia = null;
+			
+			          let conteudo = null;
+			
+			
+			
+			          if (celula.getElementsByTagName('a').length > 0) {
+			
+			            const link = celula.getElementsByTagName('a')[0];
+			
+			            conteudo = link.innerHTML.split('<br>');
+			
+			            dia = conteudo[0].replace(/[^0-9]/g, '');
+			
+			          } else {
+			
+			            conteudo = celula.innerHTML.split('<br>');
+			
+			            dia = conteudo[0].trim();
+			
+			          }
+			
+			
+			
+			          if (i === 0 && j < 2) {
+			
+			            // verificar se é dia do mês anterior
+			
+			            if (parseInt(dia) > 20) {
+			
+			              continue;
+			
+			            }
+			
+			          }
+			
+			
+			
+			          // verificar se tem horário
+			
+			          const horarios = conteudo.slice(1).filter(h => h.trim().match(/^\d{1,2}:\d{2}$/));
+			
+			          if (horarios.length === 0 && !isNaN(parseInt(dia)) && dia !== '') {
+			
+			            diasDeFolga.push(`${dia}`);
+			
+			          }
+			
+			        }
+			
+			      }
+			
+			
+			
+			      return diasDeFolga;
+			
+			    }
+			
+			    
+			
+			    
+			
+			    function parseScheduleText(text) {
+			
+				  const daysOff = text.split(',').map(day => parseInt(day.trim()));
+			
+				  return daysOff.filter(day => !isNaN(day));
+			
+				}
+			
+				
+			
+				function extractDaysOffFromInput(input) {
+			
+				  if (input.trim().toLowerCase().startsWith('<t')) {
+			
+				    const daysOffStrings = parseScheduleTable(input);
+			
+				    return daysOffStrings.map(dayString => parseInt(dayString));
+			
+				  } else {
+			
+				    return parseScheduleText(input);
+			
+				  }
+			
+				}
+			
+			
+			
+			async function saveSchedulesToGist() {
+			
+			  if (!token) {
+			
+			      showError('Token não definido. Não é possível salvar.');
+			
+			      return Promise.reject('Token não definido');
+			
+			  }
+			
+			  showLoading(true);
+			
+			  try {
+			
+			    const contentToSave = JSON.stringify(schedules || {}, null, 2);
+			
+			
+			
+			    const gistData = {
+			
+			      files: {
+			
+			        [filename]: {
+			
+			          content: contentToSave
+			
+			        }
+			
+			      }
+			
+			    };
+			
+			
+			
+			    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+			
+			      method: 'PATCH',
+			
+			      headers: {
+			
+			        'Authorization': `Bearer ${token}`,
+			
+			        'Content-Type': 'application/json',
+			
+			        'Accept': 'application/vnd.github.v3+json'
+			
+			      },
+			
+			      body: JSON.stringify(gistData)
+			
+			    });
+			
+			
+			
+			    if (!response.ok) {
+			
+			      if (response.status === 404) {
+			
+			          console.warn(`Gist ${gistId} não encontrado ao tentar salvar. Tentando criar...`);
+			
+			          // Implementar createGist() se necessário
+			
+			          throw new Error(`Gist ${gistId} não encontrado. Crie o Gist manualmente ou implemente a criação automática.`);
+			
+			      }
+			
+			      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido ao salvar.' }));
+			
+			      throw new Error(`Erro ${response.status}: ${errorData.message || 'Não foi possível salvar as escalas no Gist.'}`);
+			
+			    }
+			
+			
+			
+			    console.log('Escalas salvas com sucesso no Gist existente!');
+			
+			    return Promise.resolve();
+			
+			
+			
+			  } catch (error) {
+			
+			    console.error('Erro ao salvar escalas no Gist:', error);
+			
+			    showError(`Erro ao salvar escalas: ${error.message}`);
+			
+			    throw error;
+			
+			  } finally {
+			
+			      showLoading(false);
+			
+			  }
+			
+			}
+			
+			
+			
+			// --- Funções do Modal --- 
+			
+			
+			
+			function openScheduleModal() {
+			
+			  const modal = document.getElementById('scheduleModal');
+			
+			  if (!modal) return;
+			
+			
+			
+			  // Reset steps
+			
+			  document.getElementById('step1').style.display = 'block';
+			
+			  document.getElementById('step2').style.display = 'none';
+			
+			
+			
+			  const monthSelect = document.getElementById('schedule-month');
+			
+			  const yearSelect = document.getElementById('schedule-year');
+			
+			
+			
+			  if (!monthSelect || !yearSelect) {
+			
+			      console.error("Elementos select de mês/ano do modal não encontrados!");
+			
+			      return;
+			
+			  }
+			
+			
+			
+			  monthSelect.innerHTML = '<option value="">Selecione o mês</option>';
+			
+			  yearSelect.innerHTML = '<option value="">Selecione o ano</option>';
+			
+			
+			
+			  const currentMonthNum = new Date().getMonth();
+			
+			  for (let i = 0; i < 12; i++) {
+			
+			    const option = document.createElement('option');
+			
+			    option.value = getMonthName(i);
+			
+			    option.text = getMonthName(i);
+			
+			    monthSelect.appendChild(option);
+			
+			  }
+			
+			  monthSelect.value = getMonthName(currentMonthNum);
+			
+			
+			
+			  const currentYearNum = new Date().getFullYear();
+			
+			  for (let year = currentYearNum; year <= currentYearNum + 2; year++) {
+			
+			    const option = document.createElement('option');
+			
+			    option.value = year;
+			
+			    option.text = year;
+			
+			    yearSelect.appendChild(option);
+			
+			  }
+			
+			   yearSelect.value = currentYearNum;
+			
+			
+			
+			  document.querySelectorAll('input[name="pessoa"]').forEach(radio => radio.checked = false);
+			
+			
+			
+			  const scheduleTableTextarea = document.getElementById('schedule-table');
+			
+			  if (scheduleTableTextarea) scheduleTableTextarea.value = '';
+			
+			
+			
+			  modal.style.display = 'block';
+			
+			}
+			
+			
+			
+			function closeScheduleModal() {
+			
+			  const modal = document.getElementById('scheduleModal');
+			
+			  if (modal) {
+			
+			      modal.style.display = 'none';
+			
+			  }
+			
+			}
+			
+			
+			
+			function showSuccess(message) {
+			
+			  showCustomPopup('success', '✅', '', message, [
+			
+			    { text: 'OK', class: 'popup-btn popup-btn-success', callback: null }
+			
+			  ]);
+			
+			}
+			
+			
+			
+			function showConfirm(message, callback) {
+			
+			  showCustomPopup('confirm', '❓', '', message, [
+			
+			    { text: 'Não', class: 'popup-btn popup-btn-secondary', callback: () => callback(false) },
+			
+			    { text: 'Sim', class: 'popup-btn popup-btn-primary', callback: () => callback(true) }
+			
+			  ]);
+			
+			}
+			
+			
+			
+			function showError(message) {
+			
+			  showCustomPopup('error', '❌', '', message, [
+			
+			    { text: 'OK', class: 'popup-btn popup-btn-primary', callback: null }
+			
+			  ]);
+			
+			}
+			
+			
+			
+			function showCustomPopup(type, icon, title, message, buttons) {
+			
+			  const popup = document.getElementById('customPopup');
+			
+			  const content = document.getElementById('popupContent');
+			
+			  const iconEl = document.getElementById('popupIcon');
+			
+			  const titleEl = document.getElementById('popupTitle');
+			
+			  const messageEl = document.getElementById('popupMessage');
+			
+			  const buttonsEl = document.getElementById('popupButtons');
+			
+			
+			
+			  // Configurar conteúdo
+			
+			  iconEl.textContent = icon;
+			
+			  titleEl.textContent = title;
+			
+			  messageEl.textContent = message;
+			
+			
+			
+			  // Limpar classes antigas e adicionar nova
+			
+			  content.className = `popup-content ${type}`;
+			
+			
+			
+			  // Criar botões
+			
+			  buttonsEl.innerHTML = '';
+			
+			  buttons.forEach(button => {
+			
+			    const btn = document.createElement('button');
+			
+			    btn.textContent = button.text;
+			
+			    btn.className = button.class;
+			
+			    btn.onclick = () => {
+			
+			      closeCustomPopup();
+			
+			      if (button.callback) {
+			
+			        button.callback();
+			
+			      }
+			
+			    };
+			
+			    buttonsEl.appendChild(btn);
+			
+			  });
+			
+			
+			
+			  // Mostrar popup
+			
+			  popup.style.display = 'block';
+			
+			
+			
+			  // Auto-fechar após 5 segundos para success/error
+			
+			  if (type === 'success' || type === 'error') {
+			
+			    setTimeout(() => {
+			
+			      if (popup.style.display === 'block') {
+			
+			        closeCustomPopup();
+			
+			      }
+			
+			    }, 5000);
+			
+			  }
+			
+			}
+			
+			
+			
+			function closeCustomPopup() {
+			
+			  const popup = document.getElementById('customPopup');
+			
+			  popup.style.display = 'none';
+			
+			}
+			
+			
+			
+			function goToStep2() {
+			
+			  const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
+			
+			  const selectedMonth = document.getElementById('schedule-month').value;
+			
+			  const selectedYear = document.getElementById('schedule-year').value;
+			
+			
+			
+			  if (!selectedPersonRadio) {
+			
+			    showError('Por favor, selecione uma pessoa.');
+			
+			    return;
+			
+			  }
+			
+			
+			
+			  if (!selectedMonth || !selectedYear) {
+			
+			    showError('Por favor, selecione o mês e ano.');
+			
+			    return;
+			
+			  }
+			
+			
+			
+			  function getSelectedDaysFromCalendar() {
+			
+			    const checkboxes = document.querySelectorAll('#editable-calendar-body input[type="checkbox"]:checked');
+			
+			    return Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => a - b);
+			
+			  }
+			
+			
+			
+			  // Carregar dias já salvos se existirem
+			
+			  const person = selectedPersonRadio.value;
+			
+			  const monthKey = `${selectedMonth} ${selectedYear}`;
+			
+			  const existingDays = (schedules[person] && schedules[person][monthKey]) ? schedules[person][monthKey] : [];
+			
+			  
+			
+			  // Construir calendário editável
+			
+			  const year = parseInt(selectedYear);
+			
+			  const monthNumber = getMonthNumber(selectedMonth);
+			
+			  buildEditableCalendar(year, monthNumber, existingDays);
+			
+			
+			
+			  // Avançar para step 2
+			
+			  document.getElementById('step1').style.display = 'none';
+			
+			  document.getElementById('step2').style.display = 'block';
+			
+			}
+			
+			
+			
+			function goToStep1() {
+			
+			  document.getElementById('step2').style.display = 'none';
+			
+			  document.getElementById('step1').style.display = 'block';
+			
+			}
+			
+			
+			
+			// Helper function para obter dias marcados no calendário editável
+			// (Pode colocar esta função antes ou depois de saveSchedule, mas fora dela)
+			// Helper function para obter dias marcados no calendário editável
+			function getSelectedDaysFromCalendar() {
+			  const checkboxes = document.querySelectorAll('#editable-calendar-body input[type="checkbox"]:checked');
+			  // Garante que os valores sejam números inteiros e ordenados
+			  return Array.from(checkboxes).map(cb => parseInt(cb.value)).filter(day => !isNaN(day)).sort((a, b) => a - b);
+			}
+			
+			// Função principal para salvar a escala
+			async function saveSchedule() {
+			  console.log("Função saveSchedule iniciada."); // Log para depuração
+			  showLoading(true);
+			  try {
+			    const selectedPersonRadio = document.querySelector('input[name="pessoa"]:checked');
+			    const selectedMonth = document.getElementById('schedule-month').value;
+			    const selectedYear = document.getElementById('schedule-year').value;
+			    const tableContent = document.getElementById('schedule-table').value.trim(); // Conteúdo do Textarea
+			
+			    // --- Validação dos Inputs Iniciais ---
+			    if (!selectedPersonRadio) {
+			      showError('Por favor, selecione uma pessoa.');
+			      showLoading(false);
+			      return;
+			    }
+			    const person = selectedPersonRadio.value;
+			
+			    if (!selectedMonth || !selectedYear) {
+			      showError('Por favor, selecione o mês e ano.');
+			      showLoading(false);
+			      return;
+			    }
+			
+			    const monthKey = `${selectedMonth} ${selectedYear}`;
+			    let daysOff = []; // Inicializa array para os dias de folga
+			
+			    // --- Obter Dias de Folga (Verifica ambas as fontes) ---
+			    const calendarDays = getSelectedDaysFromCalendar();
+			    console.log("Dias selecionados no calendário:", calendarDays); // Log
+			
+			    let textareaDays = [];
+			    // Verifica se há conteúdo no textarea
+			    if (tableContent) {
+			      console.log("Verificando conteúdo do textarea:", tableContent); // Log
+			      try {
+			        textareaDays = extractDaysOffFromInput(tableContent);
+			        // Garante que o resultado seja um array de números válido
+			        if (!Array.isArray(textareaDays)) {
+			          console.error('extractDaysOffFromInput não retornou um array:', textareaDays);
+			          textareaDays = [];
+			        } else {
+			          // Filtra e converte para números
+			          textareaDays = textareaDays.map(d => parseInt(d)).filter(d => !isNaN(d));
+			          console.log("Dias extraídos do textarea:", textareaDays); // Log
+			        }
+			      } catch (parseError) {
+			        console.error('Erro ao processar input do textarea:', parseError);
+			        textareaDays = [];
+			      }
+			    }
+			
+			    // Prioriza os dias do calendário, mas usa o textarea se o calendário estiver vazio
+			    if (calendarDays.length > 0) {
+			      daysOff = calendarDays;
+			      console.log("Usando dias do calendário:", daysOff);
+			    } else if (textareaDays.length > 0) {
+			      daysOff = textareaDays;
+			      console.log("Usando dias do textarea:", daysOff);
+			    } else {
+			      // Se ambos estiverem vazios, verifica se já existe uma escala
+			      if (schedules[person] && schedules[person][monthKey]) {
+			        // Mantém a escala existente
+			        console.log("Ambas as fontes vazias, mantendo escala existente.");
+			        showError('Nenhum dia de folga selecionado ou informado. Por favor, marque os dias no calendário ou cole a escala no campo de texto.');
+			        showLoading(false);
+			        return;
+			      } else {
+			        // Não há escala existente e nenhum dia foi informado
+			        console.log("Ambas as fontes vazias e não há escala existente.");
+			        showError('Por favor, marque os dias de folga no calendário OU cole a escala no campo de texto.');
+			        showLoading(false);
+			        return;
+			      }
+			    }
+			
+			    // --- Processar Salvamento (Confirmação e Chamada Real) ---
+			    const processSaveFlow = async (finalDaysOff) => {
+			      console.log(`Prosseguindo para salvar para ${person}, ${monthKey}:`, finalDaysOff); // Log
+			      try {
+			        // Garante que é um array antes de salvar
+			        if (!Array.isArray(finalDaysOff)) {
+			          throw new Error("Formato inválido para dias de folga ao tentar salvar.");
+			        }
+			        await saveScheduleData(person, monthKey, finalDaysOff);
+			        // saveScheduleData já cuida de showSuccess e showLoading(false) em caso de sucesso
+			      } catch (saveError) {
+			        console.error('Erro durante a chamada de saveScheduleData:', saveError);
+			        // saveScheduleData deve tratar seu próprio showError, mas adicionamos um fallback
+			        showError(`Erro ao salvar a escala: ${saveError.message}`);
+			        showLoading(false); // Garante que o loading seja escondido em caso de erro
+			      }
+			    };
+			
+			    // Verifica se já existe escala para esta pessoa/mês
+			    const existingSchedule = schedules[person] && schedules[person][monthKey];
+			
+			    if (existingSchedule) {
+			      console.log("Escala existente encontrada:", existingSchedule); // Log
+			      
+			      // Garante que a escala existente seja um array e esteja ordenada para comparação
+			      const currentDaysSorted = Array.isArray(existingSchedule) ? 
+			        [...existingSchedule].map(d => parseInt(d)).filter(d => !isNaN(d)).sort((a, b) => a - b) : [];
+			      
+			      // Garante que os novos dias estejam ordenados e sejam números válidos
+			      const newDaysSorted = [...daysOff].map(d => parseInt(d)).filter(d => !isNaN(d)).sort((a, b) => a - b);
+			      
+			      console.log("Comparando dias existentes:", currentDaysSorted, "com novos dias:", newDaysSorted);
+			      
+			      // Compara versões stringificadas para ver se há mudanças
+			      const currentDaysString = JSON.stringify(currentDaysSorted);
+			      const newDaysString = JSON.stringify(newDaysSorted);
+			      
+			      if (currentDaysString === newDaysString && newDaysSorted.length > 0) {
+			        console.log("Nenhuma alteração detectada."); // Log
+			        showSuccess("Nenhuma alteração detectada na escala.");
+			        showLoading(false);
+			        closeScheduleModal(); // Fecha o modal se não houver mudanças
+			        return;
+			      } else {
+			        // Mudanças detectadas ou novos dados, pede confirmação
+			        console.log("Mudanças detectadas, pedindo confirmação."); // Log
+			        showConfirm(`Já existe uma escala para ${person} em ${monthKey}. Deseja substituir?`, (confirmed) => {
+			          if (confirmed) {
+			            console.log("Usuário confirmou a substituição."); // Log
+			            processSaveFlow(newDaysSorted); // Passa o array com os novos dias já processados
+			          } else {
+			            console.log("Usuário cancelou a substituição."); // Log
+			            showLoading(false); // Esconde o loading se o usuário cancelar
+			          }
+			        });
+			      }
+			    } else {
+			      // Nenhuma escala existente, salva diretamente
+			      console.log("Nenhuma escala existente, salvando diretamente."); // Log
+			      const finalDaysOff = [...daysOff].map(d => parseInt(d)).filter(d => !isNaN(d)).sort((a, b) => a - b);
+			      processSaveFlow(finalDaysOff); // Passa o array com os dias processados
+			    }
+			
+			  } catch (error) {
+			    // Captura erros inesperados no bloco try principal
+			    console.error('Erro inesperado na função saveSchedule:', error);
+			    showError(`Ocorreu um erro inesperado: ${error.message}`);
+			    showLoading(false);
+			  }
+			}
+			
+			
+			async function saveScheduleData(person, monthKey, daysOff) {
+			
+			  console.warn(`Nenhum dia de folga extraído para ${person} em ${monthKey}. Salvando escala sem folgas.`);
+			
+			  if (!schedules[person]) {
+			
+			    schedules[person] = {};
+			
+			  }
+			
+			  schedules[person][monthKey] = daysOff;
+			
+			  console.log(`Escala local atualizada para ${person} em ${monthKey}:`, daysOff);
+			
+			
+			
+			  await saveSchedulesToGist();
+			
+			
+			
+			  updateMonthSelect();
+			
+			  const mainMonthSelect = document.getElementById('month-select');
+			
+			  if (mainMonthSelect) mainMonthSelect.value = monthKey;
+			
+			  loadMonth(monthKey);
+			
+			
+			
+			  closeScheduleModal();
+			
+			
+			
+			  showSuccess(`Escala de ${person} para ${monthKey} salva com sucesso!`);
+			
+			  showLoading(false);
+			
+			}
+			
+			
+			
+			document.addEventListener('DOMContentLoaded', () => {
+			
+			  
+			
+			  // Obter referências dos elementos
+			
+			  const addScheduleBtn = document.getElementById('add-schedule-btn');
+			
+			  const monthSelect = document.getElementById('month-select');
+			
+			  const modal = document.getElementById('scheduleModal');
+			
+			  const closeBtn = modal?.querySelector('.close');
+			
+			  const cancelBtn = document.getElementById('cancel-btn');
+			
+			  const nextBtn = document.getElementById('next-btn');
+			
+			  const backBtn = document.getElementById('back-btn');
+			
+			  const saveBtn = document.getElementById('save-schedule-btn');
+			
+			
+		// Links para alternar entre calendário e input de tabela
+		const showTableInputLink = document.getElementById('show-table-input');
+		const showCalendarLink = document.getElementById('show-calendar');
+		const calendarSection = document.getElementById('calendar-section');
+		const tableInputSection = document.getElementById('table-input-section');
+		
+		if (showTableInputLink) {
+		  showTableInputLink.addEventListener('click', (e) => {
+		    e.preventDefault();
+		    calendarSection.style.display = 'none';
+		    tableInputSection.style.display = 'block';
+		  });
+		}
+		
+		if (showCalendarLink) {
+		  showCalendarLink.addEventListener('click', (e) => {
+		    e.preventDefault();
+		    tableInputSection.style.display = 'none';
+		    calendarSection.style.display = 'block';
+		  });
+		}
+			
+		// Event listeners
+		if (closeBtn) closeBtn.addEventListener('click', closeScheduleModal);
+		if (cancelBtn) cancelBtn.addEventListener('click', closeScheduleModal);
+		if (nextBtn) nextBtn.addEventListener('click', goToStep2);
+		if (backBtn) backBtn.addEventListener('click', goToStep1);
+		if (saveBtn) saveBtn.addEventListener('click', saveSchedule);
+		if (addScheduleBtn) addScheduleBtn.addEventListener('click', openScheduleModal);
+			
+		if (monthSelect) {
+		  monthSelect.addEventListener('change', (e) => {
+		    loadMonth(e.target.value);
+		  });
+		}
+		
+		// Modal click outside to close
+		if (modal) {
+		  window.addEventListener('click', (e) => {
+		    if (e.target === modal) {
+		      closeScheduleModal();
+		    }
+		  });
+		}
+		
+		// Inicialização
+		updateUIBasedOnToken(false);
+		
+		const savedToken = localStorage.getItem('githubToken');
+		if (savedToken) {
+		  document.getElementById('tokenInput').value = savedToken;
+		  setTimeout(usarToken, 100);
+		} else {
+		  const monthSelectEl = document.getElementById('month-select');
+		  if (monthSelectEl) {
+		    monthSelectEl.innerHTML = '<option value="">Informe o token primeiro</option>';
+		    monthSelectEl.disabled = true;
+		  }
+		}
+		);
+
+		</script>
+		<div id="customPopup" class="custom-popup">
+			<div id="popupContent" class="popup-content">
+				<div id="popupIcon" class="popup-icon"></div>
+				<div id="popupTitle" class="popup-title"></div>
+				<div id="popupMessage" class="popup-message"></div>
+				<div id="popupButtons" class="popup-buttons"></div>
+			</div>
+		</div>
+	</body>
+</html>
