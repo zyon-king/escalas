@@ -1,4 +1,6 @@
 1. peca para o chat gpt criar o svg gradiente
 2. no canvas.com altere os tons do gradiente no editor de svg do canvas
 3. apra o 'pix lr E', remova o fundo e salve como png
-4. conveta o png online para svg
+3.1 acesse https://pixelied.com/convert/png-converter/png-to-svg
+3.2 esse é o unico site que eu achei que mantem o degrade
+4. converta o png online para svg 
