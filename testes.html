@@ -13,6 +13,8 @@
 			text-align: center;
 			margin-bottom: 20px;
 			}
+            
+        	/*clamp(valor mínimo, valor ideal, valor máximo)*/
 			/**/
 			.computer-mode {
 			width: 1000px;
@@ -105,6 +107,58 @@
 			height: 50px;
 			margin-bottom: 15px; /* Adiciona um espaço entre o input e o botão */
 			}
+            
+      /**/  
+      .notification {
+			    position: fixed;
+			    top: 15px; /* Valor fixo para garantir que fique no topo */
+			    right: 15px; /* Valor fixo para garantir que fique na direita */
+			    cursor: pointer;
+			    z-index: 9999; /* Garante que fique acima de outros elementos */
+			
+			    width: clamp(45px, 10vw, 80px);
+			    height: clamp(45px, 10vw, 80px); /* Mantém quadrado */
+			
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			
+			    /* position: relative; foi removido pois 'position: fixed' já estabelece o contexto de posicionamento para filhos com 'position: absolute' */
+			}
+			
+			.notification img {
+			    width: 100%;
+			    height: auto;
+			    aspect-ratio: 1 / 1;
+			    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+			}
+			
+			.notification .counter {
+			    position: absolute;
+			
+			    /* Ajuste de posição RELATIVA à .notification */
+			    top: -5%;
+			    right: -5%; /* O counter continua no canto superior direito do ícone */
+			
+			    background-color: 
+			    color: #fff;
+			    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+			    border-radius: 50%;
+                
+          display: flex;
+			
+			    padding: 5%; /* relativo ao width do pai */
+			    width: 40%;
+			    height: 40%;
+			}		
+      
+      .notification .counter img {
+          width: 100%;
+          height: 100%;
+          filter: none;
+      }
+			/**/   
+			
 			.controls {
 			text-align: center;
 			margin-bottom: 20px;
@@ -494,8 +548,7 @@
 			.token {
 			width: 100%; /* Ocupa toda a largura da tela */
 			padding: 10px; /* Ajuste o espaçamento */
-			}
-			}
+			}			
 		</style>
 	</head>
 	<body>
@@ -511,14 +564,25 @@
 			<input type="password" id="tokenInput" placeholder="Insira o token">
 			<button onclick="usarToken()" id="executar-btn">Executar</button>
 		</div>
+        
+    	
+    <div class="notification">
+        <img src="https://cdn.jsdelivr.net/gh/zyon-king/escalas@main/notification-new.svg" alt="Sino Gradient Icon" />
+        <span class="counter">
+            <img src="https://cdn.jsdelivr.net/gh/zyon-king/escalas@main/counter-new.svg" alt="Counter Icon" />
+        </span>
+    </div>
+        
 		<div class="controls">
 			<select id="month-select">
 				<option value="">Carregando...</option>
 			</select>
 			<button id="add-schedule-btn">Editar Folgas</button>
 		</div>
+        
 		<div id="loading" class="loading" style="display: none;">Carregando dados...</div>
 		<div id="error" class="error" style="display: none;"></div>
+        
 		<table>
 			<thead>
 				<tr>
