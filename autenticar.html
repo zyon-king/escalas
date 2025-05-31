@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxo de Autenticação</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Fluxo de Autenticação</h1>
+  </header>
+  <main>
+    <section class="fluxo">
+      <h2>Passos</h2>
+      <ol>
+        
+  <li><span class="passo">Usuário acessa a página:</span> O usuário acessa a página HTML que contém o formulário de login.</li>
+  <li><span class="passo">Usuário envia solicitação de autenticação:</span> O usuário preenche o formulário de login e envia a solicitação de autenticação para o Gist de autenticação.</li>
+  <li><span class="passo">Gist de autenticação é atualizado:</span> O Gist de autenticação é atualizado com a solicitação de autenticação.</li>
+  <li><span class="passo">Webhook é acionado:</span> O Webhook é acionado quando o Gist de autenticação é atualizado.</li>
+  <li><span class="passo">Servidor intermediário recebe notificação:</span> O servidor intermediário recebe a notificação do Webhook e verifica a solicitação de autenticação.</li>
+  <li><span class="passo">Servidor intermediário gera token de sessão:</span> Se a solicitação de autenticação for válida, o servidor intermediário gera um token de sessão.</li>
+  <li><span class="passo">Token de sessão é criptografado:</span> O token de sessão é criptografado com uma chave secreta armazenada no servidor intermediário.</li>
+  <li><span class="passo">Token de sessão criptografado é enviado para o Gist de autenticação:</span> O token de sessão criptografado é enviado para o Gist de autenticação.</li>
+  <li><span class="passo">Página HTML verifica o Gist de autenticação:</span> A página HTML verifica periodicamente o Gist de autenticação para ver se o token de sessão criptografado foi enviado.</li>
+  <li><span class="passo">Página HTML descriptografa o token de sessão:</span> Se o token de sessão criptografado for encontrado, a página HTML envia uma requisição para o servidor intermediário para descriptografar o token de sessão.</li>
+  <li><span class="passo">Servidor intermediário descriptografa o token de sessão:</span> O servidor intermediário descriptografa o token de sessão com a chave secreta armazenada.</li>
+  <li><span class="passo">Página HTML recebe o token de sessão:</span> A página HTML recebe o token de sessão descriptografado e pode usá-lo para acessar os recursos protegidos.</li>
+
+      </ol>
+    </section>
+    <section class="diagrama">
+      <h2>Fluxo de Autenticação com Criptografia</h2>
+      <div class="diagram-container">
+        <div class="box">Usuário</div>
+        <div class="arrow">→</div>
+        <div class="box">Página HTML (formulário de login)</div>
+        <div class="arrow">→</div>
+        <div class="box">Gist de autenticação</div>
+        <div class="arrow">→</div>
+        <div class="box">Webhook</div>
+        <div class="arrow">→</div>
+        <div class="box">Servidor intermediário (criptografia)</div>
+        <div class="arrow">→</div>
+        <div class="box">Token de sessão criptografado</div>
+        <div class="arrow">→</div>
+        <div class="box">Gist de autenticação</div>
+        <div class="arrow">→</div>
+        <div class="box">Página HTML (verificação)</div>
+        <div class="arrow">→</div>
+        <div class="box">Servidor intermediário (descriptografia)</div>
+        <div class="arrow">→</div>
+        <div class="box">Token de sessão descriptografado</div>
+      </div>
+    </section>
+  </main>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+	  line-height: 1.8; /*espaçamento entre as linhas */
+	}
+    .passo {
+  	  font-weight: bold;
+	}
+    .fluxo {
+      margin-bottom: 40px;
+    }
+    .diagrama {
+      margin-bottom: 40px;
+    }
+    .diagram-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .box {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .arrow {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  </style>
+</body>
+</html>
