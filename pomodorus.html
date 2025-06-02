@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodorus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #mensagem {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="mensagem"></div>
+    
+	<hr>
+    
+    <button id="btn-notificacao">Solicitar Notificação de Teste?</button>
+    <script src="https://cdn.statically.io/gh/zyon-king/granular/main/notificacoes.js"></script>
+    <script>
+        const btnNotificacao = document.getElementById('btn-notificacao');
+
+        function verificarCondicoes() {
+            if (!isNotificationSupported()) {
+                alert("Seu navegador não suporta notificações.");
+                return false;
+            }
+
+            if (isIncognitoMode()) {
+                alert("Notificações não funcionam no modo anônimo.");
+                return false;
+            }
+
+            if (isPermissionDenied()) {
+                alert("Permissão já foi negada anteriormente. Você não receberá notificações.");
+                return false;
+            }
+
+            if (isPermissionGranted()) {
+                setTimeout(() => {
+                    new Notification('Notificação!', {
+                        body: 'Essa é uma notificação simples!',
+                        icon: 'https://picsum.photos/48/48'
+                    });
+                }, 5000); // 5 segundos
+                return false;
+            }
+
+            return true;
+        }
+
+        btnNotificacao.addEventListener('click', () => {
+            if (verificarCondicoes()) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        setTimeout(() => {
+                            new Notification('Notificação!', {
+                                body: 'Essa é uma notificação simples!',
+                                icon: 'https://picsum.photos/48/48'
+                            });
+                        }, 5000); // 5 segundos
+                    } else {
+                        alert('Permissão negada!');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
