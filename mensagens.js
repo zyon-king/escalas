@@ -37,3 +37,27 @@ function showCustomPopup(type, icon, title, message, buttons) {
 
   document.body.appendChild(popup);
 }
+
+function showError(message) {
+  showCustomPopup('error', '', 'Erro', message, [
+    { text: 'OK', class: 'popup-btn popup-btn-error', callback: null }
+  ]);
+}
+
+/**
+* Três tipos de mensagens (erro, confirmação e sucesso), 
+* provavelmente cobre os principais casos de uso 
+* para mensagens na aplicação.
+*/
+function showConfirmation(message, callbackSim, callbackNao) {
+  showCustomPopup('confirmation', '', 'Confirmação', message, [
+    { text: 'Sim', class: 'popup-btn popup-btn-confirmation', callback: callbackSim },
+    { text: 'Não', class: 'popup-btn popup-btn-confirmation', callback: callbackNao }
+  ]);
+}
+
+function showSuccess(message) {
+  showCustomPopup('success', '', 'Sucesso', message, [
+    { text: 'OK', class: 'popup-btn popup-btn-success', callback: null }
+  ]);
+}
