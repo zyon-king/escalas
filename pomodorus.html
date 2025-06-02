@@ -1,3 +1,86 @@
+/**
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos do Dia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .evento {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Eventos do Dia Atual</h1>
+    <div id="eventos"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.4.0/ical.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const url = 'https://outlook.office365.com/owa/calendar/a95ad6e8fdc54ffcb47f99e20ebf3117@teleperformance.com.br/23a8524933704285a8360fc55dc0a8721918841088929350856/calendar.ics';
+            const eventosDiv = document.getElementById('eventos');
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    try {
+                        const jcalData = ICAL.parse(data);
+                        const comp = new ICAL.Component(jcalData);
+                        const vevents = comp.getAllSubcomponents('vevent');
+                        const hoje = new Date();
+                        hoje.setHours(0, 0, 0, 0); // Resetar horas para comparar datas
+
+                        vevents.forEach(vevent => {
+                            const event = new ICAL.Event(vevent);
+                            if (event.startDate) {
+                                const startDate = event.startDate.toJSDate();
+                                startDate.setHours(0, 0, 0, 0); // Resetar horas para comparar datas
+
+                                if (startDate.getTime() === hoje.getTime()) {
+                                    const eventoHTML = `
+                                        <div class="evento">
+                                            <h2>${event.summary || 'Sem título'}</h2>
+                                            <p>Data: ${formatDate(startDate)}</p>
+                                            <p>Hora: ${event.startDate.toJSDate().toLocaleTimeString()}</p>
+                                            <p>Descrição: ${event.description || 'Não disponível'}</p>
+                                        </div>
+                                    `;
+                                    eventosDiv.innerHTML += eventoHTML;
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Erro ao parsear ICS:', error);
+                        eventosDiv.innerHTML = '<p>Erro ao carregar eventos.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar ICS:', error);
+                    eventosDiv.innerHTML = '<p>Erro ao carregar eventos...</p>';
+                });
+
+            function formatDate(date) {
+                return date.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+        });
+    </script>
+</body>
+</html>
+
+*/
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
