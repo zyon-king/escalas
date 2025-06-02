@@ -1,8 +1,8 @@
 /**
-* Criar os elementos HTML do popup dinamicamente 
-* dentro da função showCustomPopup usando JavaScript. 
-* Podendo ser útil para incluir o HTML do popup em todas as páginas.
-*/
+ * Criar os elementos HTML do popup dinamicamente 
+ * dentro da função showCustomPopup usando JavaScript. 
+ * Podendo ser útil para incluir o HTML do popup em todas as páginas.
+ */
 function showCustomPopup(type, icon, title, message, buttons) {
   const popup = document.createElement('div');
   popup.classList.add('popup');
@@ -31,24 +31,29 @@ function showCustomPopup(type, icon, title, message, buttons) {
     const buttonEl = document.createElement('button');
     buttonEl.textContent = button.text;
     buttonEl.classList.add(button.class);
-    buttonEl.addEventListener('click', button.callback);
+    buttonEl.addEventListener('click', () => {
+      if (button.callback) {
+        button.callback();
+      }
+      popup.remove();
+    });
     buttonsEl.appendChild(buttonEl);
   });
 
   document.body.appendChild(popup);
 }
 
+/**
+ * Três tipos de mensagens (erro, confirmação e sucesso), 
+ * provavelmente cobre os principais casos de uso 
+ * para mensagens na aplicação.
+ */
 function showError(message) {
   showCustomPopup('error', '', 'Erro', message, [
     { text: 'OK', class: 'popup-btn popup-btn-error', callback: null }
   ]);
 }
 
-/**
-* Três tipos de mensagens (erro, confirmação e sucesso), 
-* provavelmente cobre os principais casos de uso 
-* para mensagens na aplicação.
-*/
 function showConfirmation(message, callbackSim, callbackNao) {
   showCustomPopup('confirmation', '', 'Confirmação', message, [
     { text: 'Sim', class: 'popup-btn popup-btn-confirmation', callback: callbackSim },
