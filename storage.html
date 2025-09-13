@@ -239,7 +239,7 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .login-card input {
+        .login-card input, select {
             width: 90%;
             padding: 15px;
             margin-bottom: 15px;
@@ -251,11 +251,20 @@
             transition: all 0.3s ease;
         }
 
-        .login-card input::placeholder {
+        select {
+            color: black;
+            text-shadow:
+              -1px -1px 0 #fff,  
+               1px -1px 0 #fff,
+              -1px  1px 0 #fff,
+               1px  1px 0 #fff;
+        }
+
+        .login-card input::placeholder, select::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .login-card input:focus {
+        .login-card input:focus, select:focus {
             outline: none;
             border-color: #4ecdc4;
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
@@ -397,7 +406,7 @@
                 <input type="hidden" id="edit-doc-id">
                 <input type="text" id="edit-people" placeholder="people" required>
                 <input type="number" id="edit-year" placeholder="year" required>
-                <input type="text" id="edit-month" placeholder="month" required>
+				<select id="edit-month" required></select>
 				<input type="text" id="edit-daysOff" placeholder="daysOff (ex: 5, 13, 31)" required>
                 <p id="edit-message"></p>
                 <button type="submit" class="login-button">Salvar Alterações</button>
@@ -800,6 +809,27 @@
         }
     }
 	
+    // Popular o select dinamicamente com os meses do ano
+    const months = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+];
+
+    function populateMonthSelect(selectedMonth = '') {
+      const select = document.getElementById('edit-month');
+      select.innerHTML = ''; // limpa opções
+
+      months.forEach(month => {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month.charAt(0).toUpperCase() + month.slice(1);
+        if (month === selectedMonth.toLowerCase()) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+    }
+
     // Faz validação e conversão de daysOff
     function parseDaysOff(inputStr) {
         // Remove espaços e separa pelos caracteres vírgula
@@ -919,6 +949,7 @@
             editMessage.textContent = '';
             editScreen.classList.remove('hidden');
         });
+        populateMonthSelect();
     }
 
     // Chama a função para verificar o status de login ao carregar a página
