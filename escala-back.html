@@ -1065,46 +1065,94 @@ const FolgasEditor = (() => {
   function renderEditableCalendar() {
     const mes = Number(elements.monthSelect.value);
     const ano = Number(elements.yearSelect.value);
-    if (!mes || !ano) return;
-
-    // Limpa calendário atual
-    elements.editableCalendarBody.innerHTML = '';
-
-    // Obter número de dias no mês
-    const diasNoMes = new Date(ano, mes, 0).getDate();
-
-    // Gerar linhas e células para cada dia (simples, por semana)
-    let diaAtual = 1;
-    while (diaAtual <= diasNoMes) {
-      const row = document.createElement('tr');
-      for (let i = 0; i < 7; i++) {
-        const cell = document.createElement('td');
-        if (diaAtual <= diasNoMes) {
-          // Checkbox para marcar folga do dia
-          const label = document.createElement('label');
-          label.classList.add('day-checkbox');
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.value = diaAtual;
-          checkbox.checked = state.folgasSelecionadas.has(diaAtual);
-          checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-              state.folgasSelecionadas.add(diaAtual);
-            } else {
-              state.folgasSelecionadas.delete(diaAtual);
-            }
-          });
-
-          label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(diaAtual));
-          cell.appendChild(label);
-          diaAtual++;
-        } else {
-          cell.classList.add('empty');
+    
+    if (!mes || !ano) {
+      console.error('Mês ou ano não selecionado');
+      return;
+    }
+  
+    try {
+      // Limpa calendário atual
+      elements.editableCalendarBody.innerHTML = '';
+      
+      // Limpa seleções anteriores
+      state.folgasSelecionadas.clear();
+  
+      // Obter número de dias no mês
+      const diasNoMes = new Date(ano, mes, 0).getDate();
+      const primeiroDia = new Date(ano, mes - 1, 1);
+      const diaDaSemanaInicial = primeiroDia.getDay();
+  
+      // Gerar linhas e células para cada dia
+      let diaAtual = 1;
+      let semanaAtual = 0;
+  
+      // Criar semanas até cobrir todos os dias
+      while (diaAtual <= diasNoMes) {
+        const row = document.createElement('tr');
+        
+        for (let diaDaSemana = 0; diaDaSemana < 7; diaDaSemana++) {
+          const cell = document.createElement('td');
+          
+          // Primeira semana - células vazias antes do primeiro dia
+          if (semanaAtual === 0 && diaDaSemana < diaDaSemanaInicial) {
+            cell.classList.add('empty');
+          }
+          // Dias do mês
+          else if (diaAtual <= diasNoMes) {
+            const label = document.createElement('label');
+            label.classList.add('day-checkbox');
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = diaAtual; // Mantém como string inicialmente
+            checkbox.id = `day-${diaAtual}`;
+            
+            // Verifica se o dia já estava selecionado (para edição)
+            const diaNumero = parseInt(diaAtual);
+            checkbox.checked = state.folgasSelecionadas.has(diaNumero);
+            
+            // Event listener para mudanças no checkbox
+            checkbox.addEventListener('change', (event) => {
+              const dia = parseInt(event.target.value);
+              
+              if (event.target.checked) {
+                state.folgasSelecionadas.add(dia);
+                console.log(`Dia ${dia} adicionado. Folgas atuais:`, Array.from(state.folgasSelecionadas));
+              } else {
+                state.folgasSelecionadas.delete(dia);
+                console.log(`Dia ${dia} removido. Folgas atuais:`, Array.from(state.folgasSelecionadas));
+              }
+            });
+  
+            const labelText = document.createTextNode(diaAtual);
+            
+            label.appendChild(checkbox);
+            label.appendChild(labelText);
+            cell.appendChild(label);
+            
+            diaAtual++;
+          }
+          // Células vazias após o último dia
+          else {
+            cell.classList.add('empty');
+          }
+          
+          row.appendChild(cell);
         }
-        row.appendChild(cell);
+        
+        elements.editableCalendarBody.appendChild(row);
+        semanaAtual++;
+        
+        // Evita loop infinito
+        if (semanaAtual > 6) break;
       }
-      elements.editableCalendarBody.appendChild(row);
+      
+      console.log('Calendário editável criado para', mes, '/', ano);
+      
+    } catch (error) {
+      console.error('Erro ao criar calendário editável:', error);
+      alert(`Erro ao criar calendário: ${error.message}`);
     }
   }
 
@@ -1158,22 +1206,45 @@ const FolgasEditor = (() => {
   async function saveSchedule() {
     if (state.folgasSelecionadas.size === 0) {
       alert('Por favor, selecione pelo menos um dia de folga.');
-      return;
+      return Promise.reject('Nenhum dia selecionado');
     }
   
     const pessoa = state.pessoaSelecionada;
     const mes = state.mesSelecionado;
     const ano = state.anoSelecionado;
-    const folgas = Array.from(state.folgasSelecionadas).sort((a,b) => a-b);
-  
-    console.log('Salvando escala para:', { pessoa, mes, ano, folgas });
+    
+    if (!pessoa || !mes || !ano) {
+      alert('Dados incompletos. Verifique pessoa, mês e ano.');
+      return Promise.reject('Dados incompletos');
+    }
   
     try {
+      // Converte Set para Array de números ordenados
+      const folgas = Array.from(state.folgasSelecionadas).sort((a, b) => a - b);
+      
+      console.log('Salvando escala para:', { pessoa, mes, ano, folgas });
+      console.log('Tipo dos dados das folgas:', folgas.map(f => typeof f));
+  
       await saveScheduleAppwrite(pessoa, ano, mes, folgas);
+      
+      console.log('Escala salva com sucesso!');
       alert('Escala salva com sucesso!');
+      
       closeModal();
-    } catch {
-      // erro já tratado no saveScheduleAppwrite
+      
+      // Recarregar o calendário para mostrar as mudanças
+      const monthSelect = document.getElementById('month-select');
+      if (monthSelect.value) {
+        const [yearStr, monthStr] = monthSelect.value.split('-');
+        buildCalendar(parseInt(yearStr), parseInt(monthStr));
+      }
+      
+      return Promise.resolve();
+  
+    } catch (error) {
+      console.error('Erro ao salvar escala:', error);
+      alert(`Erro ao salvar escala: ${error.message}`);
+      throw error;
     }
   }
   return {
