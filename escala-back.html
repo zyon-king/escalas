@@ -670,67 +670,84 @@
 				</div>
 			</div>
 		</div>
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/umd/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@18.2.0"></script>
 <script>
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco AppWrite | Inicio
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
-// Cliente AppWrite
-// Configuração do Appwrite - manter como está no seu código principal
-/**
-const client = new Appwrite.Client()
-    .setEndpoint('https://nyc.cloud.appwrite.io/v1')
-    .setProject('686a67d5003a1b4b1bf9');
-const account = new Appwrite.Account(client);
-const databases = new Appwrite.Databases(client);
+let databases, Query, ID, client;
 
-const DATABASE_ID = '686a68130002b51fced0';
-const COLLECTION_ID = '68c535f2001de9505bde';
+function initAppwrite() {
+  return new Promise((resolve, reject) => {
+    // Se já inicializou, resolve imediatamente
+    if (client) {
+      resolve();
+      return;
+    }
+    
+    // Verifica se Appwrite está disponível
+    if (typeof Appwrite !== 'undefined') {
+      try {
+        client = new Appwrite.Client()
+          .setEndpoint('https://nyc.cloud.appwrite.io/v1')
+          .setProject('686a67d5003a1b4b1bf9');
+        
+        databases = new Appwrite.Databases(client);
+        Query = Appwrite.Query;
+        ID = Appwrite.ID;
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    } else {
+      // Se Appwrite não está carregado, aguarda um pouco e tenta novamente
+      setTimeout(() => {
+        initAppwrite().then(resolve).catch(reject);
+      }, 500);
+    }
+  });
+}
 
-/**
- * Salva a escala de folgas no Appwrite Databases.
- * @param {string} pessoa - Nome da pessoa.
- * @param {string} ano - Ano da escala.
- * @param {string} mes - Mês da escala.
- * @param {Array<number>} folgas - Lista de dias de folga.
- * @returns {Promise<void>}
- 
 async function saveScheduleAppwrite(pessoa, ano, mes, folgas) {
   try {
-    // Busca documento já existente para mesma pessoa, ano e mês,
-    // para evitar duplicação e permitir edição da escala existente
+    // Garante que a inicialização ocorreu antes de usar as variáveis.
+    await initAppwrite();
+
+    const DATABASE_ID = '686a68130002b51fced0';
+    const COLLECTION_ID = '68c535f2001de9505bde';
+    
+    // Converte o número do mês para nome do mês
+    const meses = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    const nomeDoMes = meses[parseInt(mes) - 1];
+    
     const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Appwrite.Query.equal('people', pessoa),
-      Appwrite.Query.equal('year', ano),
-      Appwrite.Query.equal('month', mes)
+      Query.equal('people', pessoa),
+      Query.equal('year', parseInt(ano)),
+      Query.equal('month', nomeDoMes)
     ]);
 
-    if (response.documents.length > 0) {
-      // Atualiza o documento existente
-      const documentId = response.documents[0].$id;
-      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, documentId, {
-        people: pessoa,
-        year: ano,
-        month: mes,
-        daysOff: folgas,
-      });
-    } else {
-      // Cria novo documento
-      await databases.createDocument(DATABASE_ID, COLLECTION_ID, 'unique()', {
-        people: pessoa,
-        year: ano,
-        month: mes,
-        daysOff: folgas,
-      });
-    }
+    const dadosParaSalvar = {
+      people: pessoa,
+      year: parseInt(ano),
+      month: nomeDoMes,
+      daysOff: folgas.map(dia => parseInt(dia))
+    };
 
+    if (response.documents.length > 0) {
+      const documentId = response.documents[0].$id;
+      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, documentId, dadosParaSalvar);
+    } else {
+      await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), dadosParaSalvar);
+    }
   } catch (error) {
     console.error('Erro ao salvar no Appwrite:', error);
     alert('Erro ao salvar escala: ' + error.message);
-    throw error; // para tratamento posterior se necessário
+    throw error;
   }
 }
-*/
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco AppWrite | Fim
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
@@ -744,6 +761,7 @@ const FolgasEditor = (() => {
     anoSelecionado: null,
     folgasSelecionadas: new Set(),
   };
+//
 
   // Cache de elementos DOM
   const elements = {
