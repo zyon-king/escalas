@@ -1,9 +1,35 @@
+<!-- 
+// --- Funções para adicionar dados de teste ---
+
+
+
+
+
+// --- Importante para o funcionamento do 'addTestData' ---
+// Certifique-se que seu formulário de edição (edit-form) no HTML
+// inclui campos correspondentes para todos os dados que você quer editar,
+// e que esses campos tenham IDs como 'edit-', 'edit-year', etc.
+// Se você não pretende editar o timestamp, pode omitir essa parte.
+
+// Exemplo de como ficaria o edit-form no HTML (se precisar ajustar):
+/*
+<form id="edit-form">
+    <input type="text" id="edit-people" placeholder="people" required>
+    <input type="number" id="edit-year" placeholder="year" required>
+    <input type="number" id="edit-month" placeholder="month" required>
+    <input type="number" id="edit-daysOff" placeholder="daysOff" required>
+    <p id="edit-message"></p>
+    <button type="submit" class="login-button">Salvar Alterações</button>
+</form>
+*/
+-->
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escalas</title>
+    <title>Login e Cadastro</title>
     <style>
         /* CSS remains the same as your original code */
         /* --- General Body Styles --- */
@@ -747,7 +773,7 @@
                 people: "João Silva", // string
                 year: 2025, // integer
                 month: "agosto", // string
-                daysOff: ["cinco"], // array de strings
+                daysOff: [5,6], // array de strings
             };
             
             console.log("Dados que serão enviados:", testData);
