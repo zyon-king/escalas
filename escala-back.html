@@ -748,6 +748,222 @@ async function saveScheduleAppwrite(pessoa, ano, mes, folgas) {
     throw error;
   }
 }
+
+// ====================
+// Gerar Lista de Meses
+// ====================
+async function loadAvailableMonthsYears() {
+  try {
+    await initAppwrite();
+
+    const DATABASE_ID = '686a68130002b51fced0';
+    const COLLECTION_ID = '68c535f2001de9505bde';
+
+    const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+
+    const mesAnoSet = new Set();
+
+    const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
+    response.documents.forEach(doc => {
+      if (doc.month && doc.year) {
+        const mesCapitalizado = capitalize(doc.month);
+        mesAnoSet.add(`${mesCapitalizado}-${doc.year}`);
+      }
+    });
+
+    const mesesLista = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    const mesAnoArray = Array.from(mesAnoSet).map(item => {
+      const [mesNome, ano] = item.split('-');
+      const mesIndex = mesesLista.findIndex(m => m === mesNome) + 1;
+      return { mesNome, ano: parseInt(ano), mesIndex };
+    });
+
+    mesAnoArray.sort((a, b) => {
+      if (a.ano === b.ano) return a.mesIndex - b.mesIndex;
+      return a.ano - b.ano;
+    });
+
+    const monthSelect = document.getElementById('month-select');
+    monthSelect.innerHTML = '';
+
+    mesAnoArray.forEach(({ mesNome, ano, mesIndex }) => {
+      const option = document.createElement('option');
+      option.value = `${ano}-${mesIndex.toString().padStart(2, '0')}`;
+      option.textContent = `${mesNome} / ${ano}`;
+      monthSelect.appendChild(option);
+    });
+
+    if (mesAnoArray.length === 0) {
+      const option = new Option('Nenhum mês carregado', '');
+      monthSelect.appendChild(option);
+    } else {
+      // NOVO: Selecionar automaticamente o mês atual ou o mais próximo
+      const dataAtual = new Date();
+      const mesAtual = dataAtual.getMonth() + 1;
+      const anoAtual = dataAtual.getFullYear();
+      
+      // Procura o mês atual primeiro
+      let opcaoParaSelecionar = mesAnoArray.find(item => 
+        item.mesIndex === mesAtual && item.ano === anoAtual
+      );
+      
+      // Se não encontrar o mês atual, pega o primeiro disponível
+      if (!opcaoParaSelecionar) {
+        opcaoParaSelecionar = mesAnoArray[0];
+      }
+      
+      // Define o valor selecionado
+      const valorParaSelecionar = `${opcaoParaSelecionar.ano}-${opcaoParaSelecionar.mesIndex.toString().padStart(2, '0')}`;
+      monthSelect.value = valorParaSelecionar;
+      
+      // Constrói o calendário automaticamente
+      buildCalendar(opcaoParaSelecionar.ano, opcaoParaSelecionar.mesIndex);
+    }
+  } catch (error) {
+    console.error('Erro ao carregar meses e anos disponíveis:', error);
+    alert('Erro ao carregar meses e anos. Veja console para mais detalhes.', error);
+  }
+}
+
+loadAvailableMonthsYears();
+
+// ====================
+// Construir Calendario
+// ====================
+
+// Ouvinte de evento ao select para disparar a atualização do calendário
+document.getElementById('month-select').addEventListener('change', handleMonthSelectChange);
+
+function handleMonthSelectChange() {
+  const monthSelect = document.getElementById('month-select');
+  const selectedValue = monthSelect.value; // Exemplo: "2025-09"
+  if (!selectedValue) return; // Nada selecionado
+
+  // Divide o valor "YYYY-MM" para ano e mês
+  const [yearStr, monthStr] = selectedValue.split('-');
+  const year = parseInt(yearStr);
+  const month = parseInt(monthStr);
+
+  // Chama função buildCalendar existente para montar o calendário
+  buildCalendar(year, month);
+}
+
+
+// ====================
+// Combinar Escalas
+// ====================
+async function buildCalendar(year, month) {
+  const calendarBody = document.getElementById('calendar-body');
+  if (!calendarBody) {
+    console.error("Elemento 'calendar-body' não encontrado!");
+    return;
+  }
+
+  calendarBody.innerHTML = '';
+  const firstDayOfMonth = new Date(year, month - 1, 1);
+  const lastDayOfMonth = new Date(year, month, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startDayOfWeek = firstDayOfMonth.getDay();
+  
+  // Definir os nomes dos meses diretamente
+  const mesesNomes = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+  ];
+  
+  // Capitalizar primeira letra do mês para manter consistência
+  const mesCapitalizado = mesesNomes[month - 1].charAt(0).toUpperCase() + mesesNomes[month - 1].slice(1);
+  const monthKey = `${mesCapitalizado} ${year}`;
+
+  // Carregar dados das folgas do Appwrite e montar objeto schedules
+  let schedules = {};
+  let people = []; // Array dinâmico baseado nos dados do banco
+  
+  try {
+    await initAppwrite();
+    const DATABASE_ID = '686a68130002b51fced0';
+    const COLLECTION_ID = '68c535f2001de9505bde';
+    
+    const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('year', year),
+      Query.equal('month', mesesNomes[month - 1])
+    ]);
+    
+    console.log('Dados carregados do Appwrite:', response.documents);
+    
+    // Montar o objeto schedules e array people dinamicamente
+    response.documents.forEach(doc => {
+      if (!people.includes(doc.people)) {
+        people.push(doc.people); // Adiciona a pessoa ao array se não existir
+      }
+      
+      if (!schedules[doc.people]) {
+        schedules[doc.people] = {};
+      }
+      schedules[doc.people][monthKey] = doc.daysOff || [];
+      console.log(`Folgas para ${doc.people} em ${monthKey}:`, doc.daysOff);
+    });
+    
+    console.log('Pessoas encontradas:', people);
+    console.log('Objeto schedules montado:', schedules);
+    console.log('monthKey usado:', monthKey);
+    
+  } catch (error) {
+    console.error('Erro ao carregar dados das folgas:', error);
+  }
+
+  let date = 1;
+
+  for (let week = 0; week < 6; week++) {
+    const row = document.createElement('tr');
+
+    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+      const cell = document.createElement('td');
+
+      if (week === 0 && dayOfWeek < startDayOfWeek) {
+        cell.classList.add('empty');
+      } else if (date > daysInMonth) {
+        cell.classList.add('empty');
+      } else {
+        let cellContent = `<div class="day-title">${date}</div>`;
+        
+        people.forEach(person => {
+          let status = '';
+          let className = 'workday';
+
+          if (schedules[person] && schedules[person][monthKey]) {
+            const dayOffList = schedules[person][monthKey];
+            
+            // Garantir que tanto date quanto os valores da lista sejam do mesmo tipo
+            if (dayOffList.includes(parseInt(date)) || dayOffList.includes(date.toString())) {
+              status = '';
+              className = person.toLowerCase().replace(' ', '-') + '-day-off';
+              cellContent += `<div class="${className}"><span class="person-name">${person}</span> ${status}</div>`;
+              console.log(`Folga encontrada: ${person} no dia ${date}`);
+            }
+          }
+        });
+
+        cell.innerHTML = cellContent;
+        date++;
+      }
+
+      row.appendChild(cell);
+    }
+
+    calendarBody.appendChild(row);
+
+    if (date > daysInMonth) {
+      break;
+    }
+  }
+}
+
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco AppWrite | Fim
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
