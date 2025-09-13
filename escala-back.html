@@ -237,7 +237,7 @@
               background: rgba(0, 0, 0, 0.8);
               backdrop-filter: blur(5px);
 			}
-			.modal-content {
+			.modal-content, .access-modal {
               background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
               margin: 1% auto;
               padding: 30px;
@@ -356,7 +356,10 @@
 			.date-selection select {
               flex: 1;
 			}
-			.modal-buttons button {
+            #tokenInput:hover {
+                cursor: text; /* Adiciona o cursor de texto ao passar o mouse */
+            }
+			.modal-buttons button, .access-button {
               padding: 15px 30px;
               margin-right: 30px;
               border: none;
@@ -372,7 +375,7 @@
               overflow: hidden;
 			}
 			
-			.modal-buttons button::before {
+			.modal-buttons button::before, .access-button::before {
               content: '';
               position: absolute;
               top: 0;
@@ -393,7 +396,7 @@
 			.modal-step.hidden {
               display: none !important;
 			}
-			.btn-primary {
+			.btn-primary, .access-button {
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
               color: white;
 			}
@@ -406,13 +409,13 @@
               background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
               color: white;
 			}
-			.btn-secondary:hover {
-			background: linear-gradient(135deg, #7a8085 0%, #65696e 100%);
-			transform: translateY(-3px);
-			box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4);
+			.btn-secondary:hover, .access-button:hover {
+              background: linear-gradient(135deg, #7a8085 0%, #65696e 100%);
+              transform: translateY(-3px);
+              box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4);
 			}
 			.editable-calendar {
-			margin: 20px 0;
+              margin: 20px 0;
 			}
 			.editable-calendar table {
               width: 100%;
@@ -523,137 +526,15 @@
               background-clip: text;
 			}
 			
-			/* Estilos para popups customizados */
-			#customPopup {
-              display: none;
-              position: fixed;
-              z-index: 1000;
-              left: 0;
-              top: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.8);
-              backdrop-filter: blur(5px);
-			}
-			.popup-content {
-              background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
-              margin: 50px auto 0 auto;
-              padding: 30px;
-              border-radius: 20px;
-              width: 90%;
-              max-width: 400px;
-              text-align: center;
-              box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-              position: relative;
-              top: 20px;
-              backdrop-filter: blur(20px);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-			}
 			@keyframes popupSlideIn {
-			from {
-			opacity: 0;
-			transform: translate(-50%, -60%);
-			}
-			to {
-			opacity: 1;
-			transform: translate(-50%, -50%);
-			}
-			}
-			.popup-content.success {
-			background: linear-gradient(135deg, rgba(79, 172, 254, 0.9) 0%, rgba(0, 242, 254, 0.9) 100%);
-			}
-			.popup-content.error {
-			background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(238, 90, 82, 0.9) 100%);
-			}
-			.popup-content.confirm {
-			background: linear-gradient(135deg, rgba(255, 236, 210, 0.9) 0%, rgba(252, 182, 159, 0.9) 100%);
-			}
-			.popup-icon {
-			font-size: 48px;
-			margin-bottom: 15px;
-			display: block;
-			filter: drop-shadow(0 0 20px currentColor);
-			}
-			.popup-title {
-			font-size: 22px;
-			font-weight: bold;
-			margin-bottom: 15px;
-			color: white;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-			}
-			.popup-content.confirm .popup-title {
-			color: #333;
-			}
-			.popup-message {
-			font-size: 30px;
-			line-height: 1.5;
-			margin-bottom: 25px;
-			color: white;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-			}
-			.popup-content.confirm .popup-message {
-			color: #555;
-			}
-			.popup-buttons {
-			display: flex;
-			justify-content: center;
-			gap: 15px;
-			}
-			.popup-btn {
-			padding: 12px 25px;
-			border: none;
-			border-radius: 12px;
-			font-size: 16px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			font-weight: 600;
-			min-width: 100px;
-			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-			position: relative;
-			overflow: hidden;
-			}
-			
-			.popup-btn::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: -100%;
-			width: 100%;
-			height: 100%;
-			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-			transition: left 0.5s;
-			}
-			
-			.popup-btn:hover::before {
-			left: 100%;
-			}
-			
-			.popup-btn-primary {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			color: white;
-			}
-			.popup-btn-primary:hover {
-			background: linear-gradient(135deg, #7c8efc 0%, #8a5fb8 100%);
-			transform: translateY(-3px);
-			box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-			}
-			.popup-btn-secondary {
-			background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-			color: white;
-			}
-			.popup-btn-secondary:hover {
-			background: linear-gradient(135deg, #7a8085 0%, #65696e 100%);
-			transform: translateY(-3px);
-			box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4);
-			}
-			.popup-btn-success {
-			background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-			color: white;
-			}
-			.popup-btn-success:hover {
-			background: linear-gradient(135deg, #32d660 0%, #24e5a8 100%);
-			transform: translateY(-3px);
-			box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+              from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+              }
+              to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+              }
 			}
 			@media only screen and (max-width: 768px) {
 			body {
@@ -699,14 +580,15 @@
 		</style>
 	</head>
 	<body>
-		<div class="mode-container">
-			<label class="switch">
-			<input type="checkbox" id="mode-toggle">
-			<span class="slider round"></span>
-			</label>
-			<span class="mode-status" id="mode-status">Mode</span>
-		</div>
-		<h1>Escala de Folgas</h1>        
+    
+    <section class="access-modal" id="accessModal">
+    	<h1>Escalas Match</h1>        
+        <h3>Acesso Restrito</h3>
+        <p>Por favor, insira o token para continuar.</p>
+        <input class="access-button" type="password" id="tokenInput" placeholder="Digite o token aqui" required>
+        <button class="access-button" id="accessButton">Acessar</button>
+        <p id="statusMessage"></p>
+    </section>       
     	
     <div class="notification">
         <img src="https://cdn.jsdelivr.net/gh/zyon-king/escalas@main/notification-new.svg" alt="Sino Gradient Icon" />
@@ -715,7 +597,8 @@
         </span>
     </div>
         
-		<div class="controls">
+		<div class="controls">    
+			<h1>Escala de Folgas</h1>        
 			<select id="month-select">
 				<option value="">Carregando...</option>
 			</select>
@@ -1580,6 +1463,94 @@ const FolgasEditor = (() => {
 document.getElementById('add-schedule-btn').addEventListener('click', () => {
   FolgasEditor.openModal();
 });
+    </script>
+    
+<script type="module">
+// 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
+// Bloco Token | Inicio
+// 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
+        // Função para ocultar todos os elementos principais da página
+        function hideMainContent() {
+          // Ocultar elementos principais
+          document.querySelector('h2').style.display = 'none';
+          document.querySelector('.notification').style.display = 'none';
+          document.querySelector('.controls').style.display = 'none';
+          document.querySelector('table').style.display = 'none';
+          document.getElementById('scheduleModal').style.display = 'none';
+
+          // Ocultar divs de loading e error se existirem
+          const loading = document.getElementById('loading');
+          const error = document.getElementById('error');
+          if (loading) loading.style.display = 'none';
+          if (error) error.style.display = 'none';
+        }
+
+        // Função para mostrar o conteúdo principal
+        function showMainContent() {
+          document.getElementById('accessModal').style.display = 'none';
+          document.querySelector('h1').style.display = 'block';
+          document.querySelector('.notification').style.display = 'flex';
+          document.querySelector('.controls').style.display = 'block';
+          document.querySelector('table').style.display = 'table';
+        }
+        hideMainContent();
+        
+        import { Client, Functions } from 'https://cdn.jsdelivr.net/npm/appwrite@20.0.0/dist/esm/sdk.js';
+
+        // Substitua com as suas credenciais do Appwrite
+        const client = new Client()
+            .setEndpoint('https://nyc.cloud.appwrite.io/v1')
+            .setProject('686a67d5003a1b4b1bf9');
+
+        const functions = new Functions(client);
+
+        const tokenInput = document.getElementById('tokenInput');
+        const accessButton = document.getElementById('accessButton');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Adiciona um "ouvinte" ao botão
+        accessButton.addEventListener('click', async () => {
+            const token = tokenInput.value;
+
+            if (!token) {
+                statusMessage.textContent = 'Por favor, digite o token.';
+                statusMessage.style.color = '#e74c3c';
+                return;
+            }
+            
+            statusMessage.textContent = 'Verificando token...';
+            statusMessage.style.color = '#f1c40f';
+
+            try {
+                const response = await functions.createExecution(
+                    '68c5be1b00315ff07f89',
+                    JSON.stringify({ token: token })
+                );
+
+                // ADICIONE ESTAS LINHAS PARA DEBUG:
+                console.log('Response completa:', response);
+                console.log('Response.body:', response.body);
+                console.log('Response.responseBody:', response.responseBody);
+
+                // Tente usar responseBody em vez de body:
+                const result = JSON.parse(response.responseBody || response.body || '{}');
+
+                if (result.success) {
+                    statusMessage.textContent = 'Token correto! Acesso liberado.';
+                    statusMessage.style.color = '#2ecc71';
+                          setTimeout(() => {
+                            showMainContent();
+                          }, 1000);
+                } else {
+                    statusMessage.textContent = 'Token inválido. Tente novamente.';
+                    statusMessage.style.color = '#e74c3c';
+                }
+            } catch (error) {
+                console.error('Erro ao chamar a função:', error);
+                statusMessage.textContent = 'Erro de comunicação. Tente mais tarde.';
+                statusMessage.style.color = '#e74c3c';
+            }
+        });
     </script>
   </body>
 </html>
