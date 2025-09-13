@@ -397,8 +397,8 @@
                 <input type="hidden" id="edit-doc-id">
                 <input type="text" id="edit-people" placeholder="people" required>
                 <input type="number" id="edit-year" placeholder="year" required>
-                <input type="number" id="edit-month" placeholder="month" required>
-                <input type="number" id="edit-daysOff" placeholder="daysOff" required>
+                <input type="text" id="edit-month" placeholder="month" required>
+				<input type="text" id="edit-daysOff" placeholder="daysOff (ex: 5, 13, 31)" required>
                 <p id="edit-message"></p>
                 <button type="submit" class="login-button">Salvar Alterações</button>
             </form>
@@ -796,32 +796,62 @@
             setStatus(`❌ Erro ao adicionar dados de teste: ${error.message}`, true);
         }
     }
+	
+    // Faz validação e conversão de daysOff
+    function parseDaysOff(inputStr) {
+        // Remove espaços e separa pelos caracteres vírgula
+        const items = inputStr.split(',').map(item => item.trim());
+
+        // Valida se quantidade não excede 31
+        if (items.length > 31) {
+            throw new Error('Quantidade máxima de dias é 31.');
+        }
+
+        // Converte para números e valida os valores
+        const daysOffArray = items.map(item => {
+            const num = Number(item);
+            if (!Number.isInteger(num) || num < 1 || num > 31) {
+                throw new Error(`Dia inválido: ${item}. Deve ser inteiro entre 1 e 31.`);
+            }
+            return num;
+        });
+
+        return daysOffArray;
+    }
 
     // E por fim, no submit do editForm:
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const docId = document.getElementById('edit-doc-id').value;
         const people = document.getElementById('edit-people').value;
         const year = parseInt(document.getElementById('edit-year').value);
-        const month = parseInt(document.getElementById('edit-month').value);
-        const daysOff = parseInt(document.getElementById('edit-daysOff').value);
-        
-        console.log("Atualizando documento:", docId);
-        
+        // MANTER COMO STRING
+        const month = document.getElementById('edit-month').value.trim();
+        const daysOffInput = document.getElementById('edit-daysOff').value;
+
         if (!docId) {
             editMessage.textContent = 'Erro: ID do documento não encontrado';
             editMessage.style.color = '#ff6b6b';
             return;
         }
-        
+
+        let daysOffArray;
+        try {
+            daysOffArray = parseDaysOff(daysOffInput);
+        } catch (error) {
+            editMessage.textContent = error.message;
+            editMessage.style.color = '#ff6b6b';
+            return; // cancela update por erro de validação
+        }
+
         const updatedData = {
             people: people,
             year: year,
             month: month,
-            daysOff: [daysOff], // Converte para array
+            daysOff: daysOffArray,
         };
-        
+
         try {
             const response = await databases.updateDocument(
                 DATABASE_ID,
@@ -829,19 +859,19 @@
                 docId,
                 updatedData
             );
-            
+
             console.log("Documento atualizado:", response);
             editMessage.textContent = 'Dados atualizados com sucesso!';
             editMessage.style.color = '#4ecdc4';
-            
+
             // Recarrega a tabela - busca todos os documentos
             fetchAndDisplayData();
-            
+
             // Fecha o modal após 1.5 segundos
             setTimeout(() => {
                 editScreen.classList.add('hidden');
             }, 1500);
-            
+
         } catch (error) {
             console.error("Erro ao atualizar documento:", error);
             editMessage.textContent = `Erro ao salvar: ${error.message}`;
