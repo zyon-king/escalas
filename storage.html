@@ -373,7 +373,7 @@
     <section id="user-screen" class="data-table-container hidden">
         <h1>Seus Dados</h1>
         <div id="status"></div>
-        <button id="add-test-data-btn" class="login-button" style="margin-bottom: 20px;">Adicionar Dados de Teste</button>
+        <button id="add-test-data-btn" class="login-button" style="margin-bottom: 20px;">Adicionar Escala</button>
         <table id="data-table">
             <thead>
                   <tr>
@@ -457,6 +457,9 @@
     // Define as constantes do seu projeto
     const DATABASE_ID = '686a68130002b51fced0';
     const COLLECTION_ID = '68c535f2001de9505bde';
+    
+    // Estado de criacao de escala
+    let creating = false;
     
     // Função para atualizar status
     function setStatus(message, isError = false) {
@@ -823,18 +826,11 @@
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const docId = document.getElementById('edit-doc-id').value;
+        // lê os valores do formulário (ajuste conforme código anterior)
         const people = document.getElementById('edit-people').value;
         const year = parseInt(document.getElementById('edit-year').value);
-        // MANTER COMO STRING
         const month = document.getElementById('edit-month').value.trim();
         const daysOffInput = document.getElementById('edit-daysOff').value;
-
-        if (!docId) {
-            editMessage.textContent = 'Erro: ID do documento não encontrado';
-            editMessage.style.color = '#ff6b6b';
-            return;
-        }
 
         let daysOffArray;
         try {
@@ -842,7 +838,42 @@
         } catch (error) {
             editMessage.textContent = error.message;
             editMessage.style.color = '#ff6b6b';
-            return; // cancela update por erro de validação
+            return;
+        }
+
+        if (creating) {
+            // Está criando: chama a função de adicionar dados de teste
+            try {
+                const testData = {
+                    people: people,
+                    year: year,
+                    month: month,
+                    daysOff: daysOffArray,
+                };
+                // Função para criar doc com dados do form
+                const response = await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTION_ID,
+                    Appwrite.ID.unique(),
+                    testData
+                );
+                setStatus("✅ Dados de teste adicionados com sucesso!");
+                fetchAndDisplayData();
+                editScreen.classList.add('hidden');
+                creating = false;
+            } catch (error) {
+                editMessage.textContent = `Erro ao adicionar dados de teste: ${error.message}`;
+                editMessage.style.color = '#ff6b6b';
+            }
+            return;
+        }
+
+        // Caso contrário, código para atualizar documento (modo edição):
+        const docId = document.getElementById('edit-doc-id').value;
+        if (!docId) {
+            editMessage.textContent = 'Erro: ID do documento não encontrado';
+            editMessage.style.color = '#ff6b6b';
+            return;
         }
 
         const updatedData = {
@@ -859,21 +890,13 @@
                 docId,
                 updatedData
             );
-
-            console.log("Documento atualizado:", response);
             editMessage.textContent = 'Dados atualizados com sucesso!';
             editMessage.style.color = '#4ecdc4';
-
-            // Recarrega a tabela - busca todos os documentos
             fetchAndDisplayData();
-
-            // Fecha o modal após 1.5 segundos
             setTimeout(() => {
                 editScreen.classList.add('hidden');
             }, 1500);
-
         } catch (error) {
-            console.error("Erro ao atualizar documento:", error);
             editMessage.textContent = `Erro ao salvar: ${error.message}`;
             editMessage.style.color = '#ff6b6b';
         }
@@ -882,22 +905,20 @@
     // Event listener para o botão de adicionar dados de teste
     const addTestDataBtn = document.getElementById('add-test-data-btn');
     if (addTestDataBtn) {
-        addTestDataBtn.addEventListener('click', async (e) => {
-            e.preventDefault(); // Previne comportamento padrão
-            console.log("Botão 'Adicionar Dados de Teste' clicado");
-            
-            try {
-                const user = await account.get();
-                console.log("Usuário logado:", user.email);
-                await addTestData();
-            } catch (error) {
-                console.error("Erro ao verificar usuário:", error);
-                alert("Você precisa estar logado para adicionar dados de teste.");
-            }
+        addTestDataBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            creating = true;
+
+            // Limpa campos do form para criar novo
+            document.getElementById('edit-doc-id').value = '';
+            document.getElementById('edit-people').value = '';
+            document.getElementById('edit-year').value = '';
+            document.getElementById('edit-month').value = '';
+            document.getElementById('edit-daysOff').value = '';
+
+            editMessage.textContent = '';
+            editScreen.classList.remove('hidden');
         });
-        console.log("Event listener do botão de teste configurado com sucesso");
-    } else {
-        console.error("Botão 'add-test-data-btn' não encontrado no DOM");
     }
 
     // Chama a função para verificar o status de login ao carregar a página
