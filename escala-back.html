@@ -677,6 +677,7 @@
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Cliente AppWrite
 // Configuração do Appwrite - manter como está no seu código principal
+/**
 const client = new Appwrite.Client()
     .setEndpoint('https://nyc.cloud.appwrite.io/v1')
     .setProject('686a67d5003a1b4b1bf9');
@@ -693,7 +694,7 @@ const COLLECTION_ID = '68c535f2001de9505bde';
  * @param {string} mes - Mês da escala.
  * @param {Array<number>} folgas - Lista de dias de folga.
  * @returns {Promise<void>}
- */
+ 
 async function saveScheduleAppwrite(pessoa, ano, mes, folgas) {
   try {
     // Busca documento já existente para mesma pessoa, ano e mês,
@@ -729,6 +730,7 @@ async function saveScheduleAppwrite(pessoa, ano, mes, folgas) {
     throw error; // para tratamento posterior se necessário
   }
 }
+*/
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco AppWrite | Fim
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
@@ -919,22 +921,27 @@ const FolgasEditor = (() => {
   }
 
   // Simulação de salvar a escala
-  function saveSchedule() {
+  async function saveSchedule() {
     if (state.folgasSelecionadas.size === 0) {
       alert('Por favor, selecione pelo menos um dia de folga.');
       return;
     }
-    // Aqui incluir a lógica para salvar dados (ex: API, localStorage...)
-    console.log('Salvando escala para:', {
-      pessoa: state.pessoaSelecionada,
-      mes: state.mesSelecionado,
-      ano: state.anoSelecionado,
-      folgas: Array.from(state.folgasSelecionadas).sort((a,b) => a-b),
-    });
-    alert('Escala salva com sucesso!');
-    closeModal();
+  
+    const pessoa = state.pessoaSelecionada;
+    const mes = state.mesSelecionado;
+    const ano = state.anoSelecionado;
+    const folgas = Array.from(state.folgasSelecionadas).sort((a,b) => a-b);
+  
+    console.log('Salvando escala para:', { pessoa, mes, ano, folgas });
+  
+    try {
+      await saveScheduleAppwrite(pessoa, ano, mes, folgas);
+      alert('Escala salva com sucesso!');
+      closeModal();
+    } catch {
+      // erro já tratado no saveScheduleAppwrite
+    }
   }
-
   return {
     openModal,
   };
