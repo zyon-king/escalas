@@ -37,75 +37,6 @@
               font-weight: 700;
               text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 			}
-			
-        	/*clamp(valor mínimo, valor ideal, valor máximo)*/
-			.token {
-              text-align: center;
-              margin-bottom: 20px;
-			}
-			.token button {
-              padding: 15px 30px;
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              border: none;
-              border-radius: 12px;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              font-weight: 600;
-              font-size: 20px;
-              min-width: 120px;
-              box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-              position: relative;
-              overflow: hidden;
-			}
-			
-			.token button::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: -100%;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-			  transition: left 0.5s;
-			}
-			
-			.token button:hover::before {
-              left: 100%;
-			}
-			
-			.token button:hover {
-              background: linear-gradient(135deg, #7c8efc 0%, #8a5fb8 100%);
-              transform: translateY(-3px);
-              box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-			}
-			
-			.token input {
-              text-align: center;
-              width: 700px;
-              max-width: 90%;
-              height: 50px;
-              margin-bottom: 15px;
-              background: rgba(255, 255, 255, 0.05);
-              border: 2px solid rgba(102, 126, 234, 0.3);
-              border-radius: 12px;
-              color: #e0e6ed;
-              padding: 15px;
-              font-size: 16px;
-              backdrop-filter: blur(10px);
-              transition: all 0.3s ease;
-			}
-			
-			.token input:focus {
-              outline: none;
-              border-color: #667eea;
-              box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-              background: rgba(255, 255, 255, 0.08);
-			}
-			
-			.token input::placeholder {
-              color: #a0a6b0;
-			}
             
           /**/  
           .notification {
@@ -492,7 +423,7 @@
               font-weight: 600;
               text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 			}
-			.weekend {
+			.weekend, #tokenInput {
               background: linear-gradient(135deg, rgba(26, 188, 156, 0.2) 0%, rgba(22, 160, 133, 0.2) 100%);
               color: #1abc9c;
               border: 1px solid rgba(26, 188, 156, 0.3);
@@ -570,7 +501,7 @@
 			width: 95%;
 			}
 			
-			.modal-content, .access-modal {
+			.modal-content, .access-modal, #tokenInput {
 			width: 90%;
 			margin: 5% auto;
 			padding: 20px;
@@ -598,7 +529,7 @@
     </div>
         
 		<div class="controls">    
-			<h1>Escala de Folgas</h1>        
+			<h1>Escalas Match</h1>        
 			<select id="month-select">
 				<option value="">Carregando...</option>
 			</select>
