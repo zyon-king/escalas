@@ -1,37 +1,9 @@
-<!-- 
-// --- Funções para adicionar dados de teste ---
-
-
-
-
-
-// --- Importante para o funcionamento do 'addTestData' ---
-// Certifique-se que seu formulário de edição (edit-form) no HTML
-// inclui campos correspondentes para todos os dados que você quer editar,
-// e que esses campos tenham IDs como 'edit-', 'edit-fraseIndex', etc.
-// Se você não pretende editar o timestamp, pode omitir essa parte.
-
-// Exemplo de como ficaria o edit-form no HTML (se precisar ajustar):
-/*
-<form id="edit-form"><input type="text" id="edit-people" placeholder="people" required>
-    <input type="text" id="edit-people" placeholder="people" required>
-    <input type="number" id="edit-year" placeholder="year" required>
-    <input type="number" id="edit-month" placeholder="month" required>
-    <input type="number" id="edit-daysOff" placeholder="daysOff" required>
-    <p id="edit-message"></p>
-    <button type="submit" class="login-button">Salvar Alterações</button>
-</form>
-*/
-
-
-
--->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login e Cadastro</title>
+    <title>Escalas</title>
     <style>
         /* CSS remains the same as your original code */
         /* --- General Body Styles --- */
@@ -373,22 +345,23 @@
     </section>
     
     <section id="user-screen" class="data-table-container hidden">
-        <h1>Seus Dados</h1>
-        <div id="status"></div>
-        <button id="add-test-data-btn" class="" style="margin-bottom: 20px;">Adicionar Dados de Teste</button>
-        <table id="data-table">
-            <thead>
+        <h1>Seus Dados</h1>
+        <div id="status"></div>
+        <button id="add-test-data-btn" class="login-button" style="margin-bottom: 20px;">Adicionar Dados de Teste</button>
+        <table id="data-table">
+            <thead>
                   <tr>
                   <th>people</th>
                   <th>year</th>
                   <th>month</th>
                   <th>daysOff</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </section>
+                  <th>Editar</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </section>
     
     <section id="edit-screen" class="login-screen-container hidden">
         <div class="login-card">
@@ -472,50 +445,40 @@
     // Se não estiver, você pode precisar remover o filtro na query ou adicioná-lo.
     
     // Seu código atual para fetchAndDisplayData:
-    // Função corrigida - remove o filtro por userId
-    async function fetchAndDisplayData(userId) {
+    // Função corrigida - remove a coluna timestamp da tabela
+    async function fetchAndDisplayData() {
         const statusDiv = document.getElementById('status');
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = ''; // Limpa a tabela antes de carregar novos dados
-    
+        
         try {
-            // Remove o filtro por userId - vai buscar todos os documentos da coleção
+            // Agora, a chamada listDocuments não usa nenhum filtro de query,
+            // buscando todos os documentos da coleção.
             const response = await databases.listDocuments(
                 DATABASE_ID,
                 COLLECTION_ID
-                // Removido o filtro: [Appwrite.Query.equal('userId', userId)]
             );
-    
+            
             if (response.documents.length === 0) {
                 statusDiv.textContent = 'Nenhum dado encontrado.';
                 return;
             }
-    
+            
             statusDiv.textContent = `Total de documentos: ${response.total}`;
-    
+            
             response.documents.forEach(doc => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                      <td>${doc.people}</td>
-                      <td>${doc.year}</td>
-                      <td>${doc.month}</td>
-                      <td>${doc.daysOff}</td>
-                      <td>${new Date(doc.timestamp).toLocaleString()}</td>
-                      <td><button class="delete-btn" data-doc-id="${doc.$id}">Excluir</button></td>
-                      <td>
-                        <button class="edit-btn"
-                          data-doc-id="${doc.$id}"
-                          data-people="${doc.people}"
-                          data-year="${doc.year}"
-                          data-month="${doc.month}"
-                          data-daysOff="${doc.daysOff}"
-                          data-timestamp="${doc.timestamp}">Editar
-                        </button>
-                      </td>
-                    `;
+                    <td>${doc.people}</td>
+                    <td>${doc.year}</td>
+                    <td>${doc.month}</td>
+                    <td>${doc.daysOff}</td>
+                    <td><button class="delete-btn" data-doc-id="${doc.$id}">Excluir</button></td>
+                    <td><button class="edit-btn" data-doc-id="${doc.$id}" data-people="${doc.people}" data-year="${doc.year + 1}" data-month="${doc.month}" data-daysOff="${doc.daysOff}">Editar</button></td>
+                `;
                 tableBody.appendChild(row);
             });
-    
+        
         } catch (error) {
             console.error("Erro ao buscar dados:", error);
             statusDiv.textContent = `Erro ao carregar dados: ${error.message}`;
@@ -704,36 +667,40 @@
     // Certifique-se que estes listeners estão configurados corretamente.
     // Se você os adicionou após a criação da tabela, eles funcionarão.
     document.getElementById('data-table').addEventListener('click', async (e) => {
-        const user = await account.get(); // Garante que o usuário está logado para ações
-    
+        
         if (e.target.classList.contains('delete-btn')) {
             const docId = e.target.getAttribute('data-doc-id');
             if (confirm('Tem certeza que deseja excluir este registro?')) {
                 try {
                     await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
                     alert('Registro excluído com sucesso!');
-                    fetchAndDisplayData(user.$id); // Recarrega a tabela
+                    fetchAndDisplayData(); // Chamada sem o userId
                 } catch (error) {
                     alert(`Erro ao excluir: ${error.message}`);
                 }
             }
-        } else if (e.target.classList.contains('edit-btn')) {            
+        } else if (e.target.classList.contains('edit-btn')) {
+            const docId = e.target.getAttribute('data-doc-id');
             const people = e.target.getAttribute('data-people');
             const year = e.target.getAttribute('data-year');
             const month = e.target.getAttribute('data-month');
             const daysOff = e.target.getAttribute('data-daysOff');
-    
-            // Preenche o formulário de edição (ajuste os IDs dos inputs no seu HTML)
+            
+            console.log("Editando documento ID:", docId);
+            
+            // Armazena o docId globalmente para usar no submit do form
+            document.getElementById('edit-doc-id').value = docId;
+            
+            // Preenche o formulário de edição
             document.getElementById('edit-people').value = people;
             document.getElementById('edit-year').value = year;
             document.getElementById('edit-month').value = month;
             document.getElementById('edit-daysOff').value = daysOff;
-    
+            
             editScreen.classList.remove('hidden');
             editMessage.textContent = '';
         }
     });
-
 
     // Função para enviar os dados editados para o Appwrite
     // --- E mais um ajuste na função updateDocument ---
@@ -769,33 +736,37 @@
 
     // Função para gerar dados de teste
     async function addTestData() {
-        const user = await account.get(); // Pega o usuário logado
-        const userId = user.$id;
-        const userEmail = user.email;
-    
-        // Dados de teste (você pode customizar estes valores)
-        const testData = {
-            people: "Teste Aleatório",
-            year: 2025,
-            month: year,
-            daysOff: 4,
-        };
-    
-        // Exemplo no seu código:
         try {
+            const user = await account.get(); // Pega o usuário logado
+            const userId = user.$id;
+            
+            console.log("Iniciando addTestData para usuário:", userId);
+            
+            // Dados de teste corrigidos
+            const testData = {
+                people: "João Silva", // string
+                year: 2025, // integer
+                month: "agosto", // string
+                daysOff: ["cinco"], // array de strings
+            };
+            
+            console.log("Dados que serão enviados:", testData);
+            
             const response = await databases.createDocument(
                 DATABASE_ID,
                 COLLECTION_ID,
                 Appwrite.ID.unique(),
                 testData
             );
-            console.log("Dados de teste criados:", response);
+            
+            console.log("Dados de teste criados com sucesso:", response);
             setStatus("✅ Dados de teste adicionados com sucesso!");
             
-            fetchAndDisplayData(userId);
-        
+            // Recarrega a tabela
+            fetchAndDisplayData();
+            
         } catch (error) {
-            console.error("Erro ao adicionar dados de teste:", error);
+            console.error("Erro detalhado ao adicionar dados de teste:", error);
             setStatus(`❌ Erro ao adicionar dados de teste: ${error.message}`, true);
         }
     }
@@ -803,33 +774,74 @@
     // E por fim, no submit do editForm:
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const docId = document.getElementById('edit-doc-id').value;
         const people = document.getElementById('edit-people').value;
         const year = parseInt(document.getElementById('edit-year').value);
         const month = parseInt(document.getElementById('edit-month').value);
         const daysOff = parseInt(document.getElementById('edit-daysOff').value);
-    
+        
+        console.log("Atualizando documento:", docId);
+        
+        if (!docId) {
+            editMessage.textContent = 'Erro: ID do documento não encontrado';
+            editMessage.style.color = '#ff6b6b';
+            return;
+        }
+        
         const updatedData = {
             people: people,
             year: year,
             month: month,
-            daysOff: daysOff,
+            daysOff: [daysOff], // Converte para array
         };
-    
-        // Chama a função para atualizar no Appwrite
-        await updateDocument(docId, updatedData);
+        
+        try {
+            const response = await databases.updateDocument(
+                DATABASE_ID,
+                COLLECTION_ID,
+                docId,
+                updatedData
+            );
+            
+            console.log("Documento atualizado:", response);
+            editMessage.textContent = 'Dados atualizados com sucesso!';
+            editMessage.style.color = '#4ecdc4';
+            
+            // Recarrega a tabela - busca todos os documentos
+            fetchAndDisplayData();
+            
+            // Fecha o modal após 1.5 segundos
+            setTimeout(() => {
+                editScreen.classList.add('hidden');
+            }, 1500);
+            
+        } catch (error) {
+            console.error("Erro ao atualizar documento:", error);
+            editMessage.textContent = `Erro ao salvar: ${error.message}`;
+            editMessage.style.color = '#ff6b6b';
+        }
     });
     
     // Event listener para o botão de adicionar dados de teste
     const addTestDataBtn = document.getElementById('add-test-data-btn');
     if (addTestDataBtn) {
-        addTestDataBtn.addEventListener('click', async () => {
+        addTestDataBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); // Previne comportamento padrão
+            console.log("Botão 'Adicionar Dados de Teste' clicado");
+            
             try {
-                await account.get(); // Verifica se o usuário está logado
-                addTestData();
+                const user = await account.get();
+                console.log("Usuário logado:", user.email);
+                await addTestData();
             } catch (error) {
+                console.error("Erro ao verificar usuário:", error);
                 alert("Você precisa estar logado para adicionar dados de teste.");
             }
         });
+        console.log("Event listener do botão de teste configurado com sucesso");
+    } else {
+        console.error("Botão 'add-test-data-btn' não encontrado no DOM");
     }
 
     // Chama a função para verificar o status de login ao carregar a página
