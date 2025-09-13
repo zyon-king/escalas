@@ -853,7 +853,6 @@ function handleMonthSelectChange() {
   buildCalendar(year, month);
 }
 
-
 // ====================
 // Combinar Escalas
 // ====================
@@ -964,6 +963,41 @@ async function buildCalendar(year, month) {
   }
 }
 
+// ====================
+// Excluir Escalas
+// ====================
+async function deleteScheduleAppwrite(pessoa, ano, mes) {
+  try {
+    await initAppwrite();
+
+    const DATABASE_ID = '686a68130002b51fced0';
+    const COLLECTION_ID = '68c535f2001de9505bde';
+    
+    // Converte o número do mês para nome do mês
+    const meses = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    const nomeDoMes = meses[parseInt(mes) - 1];
+    
+    const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('people', pessoa),
+      Query.equal('year', parseInt(ano)),
+      Query.equal('month', nomeDoMes)
+    ]);
+
+    if (response.documents.length > 0) {
+      const documentId = response.documents[0].$id;
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, documentId);
+      console.log('Escala excluída com sucesso!');
+    } else {
+      throw new Error('Escala não encontrada para exclusão.');
+    }
+  } catch (error) {
+    console.error('Erro ao excluir no Appwrite:', error);
+    throw error;
+  }
+}
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco AppWrite | Fim
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
@@ -993,6 +1027,7 @@ const FolgasEditor = (() => {
     editableCalendarBody: document.getElementById('editable-calendar-body'),
     step1: document.getElementById('step1'),
     step2: document.getElementById('step2'),
+    deleteLink: document.getElementById('delete-schedule-link'),
     // Outras referências conforme necessário
   };
 
@@ -1000,10 +1035,28 @@ const FolgasEditor = (() => {
   function openModal() {
     loadSelectOptions();
     clearState();
+
+    // NOVO: Capturar mês e ano atualmente visualizados
+    const monthSelect = document.getElementById('month-select');
+    if (monthSelect.value) {
+      const [yearStr, monthStr] = monthSelect.value.split('-');
+      const year = parseInt(yearStr);
+      const month = parseInt(monthStr);
+
+      // Pré-selecionar no modal
+      elements.monthSelect.value = month;
+      elements.yearSelect.value = year;
+
+      // Atualizar o estado interno
+      state.mesSelecionado = month.toString();
+      state.anoSelecionado = year.toString();
+    }
+
     renderStep1();
     elements.modal.style.display = 'block';
     state.isModalOpen = true;
     attachListeners();
+    updateDeleteLinkText();
   }
 
   // Função para fechar modal e limpar listeners
@@ -1019,10 +1072,11 @@ const FolgasEditor = (() => {
     state.mesSelecionado = null;
     state.anoSelecionado = null;
     state.folgasSelecionadas.clear();
-    // Reset inputs
+    // Reset apenas os radio buttons, não os selects (serão definidos no openModal)
     elements.pessoaRadios.forEach(radio => radio.checked = false);
-    elements.monthSelect.value = '';
-    elements.yearSelect.value = '';
+    // NÃO limpar os selects aqui - será feito no openModal()
+    // elements.monthSelect.value = '';
+    // elements.yearSelect.value = '';
   }
 
   // Inicializa opções dos selects mês e ano (exemplo)
@@ -1048,6 +1102,64 @@ const FolgasEditor = (() => {
     }
   }
 
+  // Função para atualizar o texto do link de exclusão
+  function updateDeleteLinkText() {
+    const deleteLink = document.getElementById('delete-schedule-link');
+    const selectedMonth = document.getElementById('schedule-month').value;
+    const selectedYear = document.getElementById('schedule-year').value;
+
+    if (deleteLink && selectedMonth && selectedYear) {
+      // Converter número do mês para nome
+      const meses = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      const nomeDoMes = meses[parseInt(selectedMonth) - 1];
+      deleteLink.textContent = `Excluir escala de ${nomeDoMes} de ${selectedYear}?`;
+    } else {
+      if (deleteLink) {
+        deleteLink.textContent = 'Excluir escala';
+      }
+    }
+  }
+  
+  // Função para tratar a exclusão da escala
+  async function handleDeleteSchedule(event) {
+    event.preventDefault();
+
+    // CORRIGIDO: Capturar os valores diretamente dos elementos DOM
+    const pessoaSelecionada = Array.from(elements.pessoaRadios).find(r => r.checked)?.value || null;
+    const mesSelecionado = elements.monthSelect.value || null;
+    const anoSelecionado = elements.yearSelect.value || null;
+
+    if (!pessoaSelecionada || !mesSelecionado || !anoSelecionado) {
+      alert('Por favor, selecione pessoa, mês e ano primeiro.');
+      return;
+    }
+
+    const meses = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const nomeDoMes = meses[parseInt(mesSelecionado) - 1];
+
+    const confirmacao = confirm("Tem certeza que deseja excluir a escala de " + pessoaSelecionada + " para " + nomeDoMes + " de " + anoSelecionado + "?");
+
+    if (confirmacao) {
+      try {
+        await deleteScheduleAppwrite(pessoaSelecionada, anoSelecionado, mesSelecionado);
+        alert('Escala excluída com sucesso!');
+        closeModal();
+
+        // Recarregar a lista de meses disponíveis
+        await loadAvailableMonthsYears();
+
+      } catch (error) {
+        console.error('Erro ao excluir escala:', error);
+		alert("Erro ao excluir escala: " + error.message);      }
+    }
+  }
+
   // Renderiza primeira etapa (seleção)
   function renderStep1() {
     elements.step1.style.display = 'block';
@@ -1062,38 +1174,66 @@ const FolgasEditor = (() => {
   }
 
   // Exemplo simples para montar calendário editável
-  function renderEditableCalendar() {
+  async function renderEditableCalendar() {
     const mes = Number(elements.monthSelect.value);
     const ano = Number(elements.yearSelect.value);
-    
+
     if (!mes || !ano) {
       console.error('Mês ou ano não selecionado');
       return;
     }
-  
+
     try {
       // Limpa calendário atual
       elements.editableCalendarBody.innerHTML = '';
-      
+
       // Limpa seleções anteriores
       state.folgasSelecionadas.clear();
-  
+
+      // NOVO: Carregar dados existentes do Appwrite
+      let folgasExistentes = [];
+      if (state.pessoaSelecionada) {
+        try {
+          await initAppwrite();
+          const DATABASE_ID = '686a68130002b51fced0';
+          const COLLECTION_ID = '68c535f2001de9505bde';
+
+          const mesesNomes = [
+            'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+            'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+          ];
+
+          const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+            Query.equal('people', state.pessoaSelecionada),
+            Query.equal('year', parseInt(ano)),
+            Query.equal('month', mesesNomes[mes - 1])
+          ]);
+
+          if (response.documents.length > 0) {
+            folgasExistentes = response.documents[0].daysOff || [];
+            console.log('Folgas existentes carregadas:', folgasExistentes);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar folgas existentes:', error);
+        }
+      }
+
       // Obter número de dias no mês
       const diasNoMes = new Date(ano, mes, 0).getDate();
       const primeiroDia = new Date(ano, mes - 1, 1);
       const diaDaSemanaInicial = primeiroDia.getDay();
-  
+
       // Gerar linhas e células para cada dia
       let diaAtual = 1;
       let semanaAtual = 0;
-  
+
       // Criar semanas até cobrir todos os dias
       while (diaAtual <= diasNoMes) {
         const row = document.createElement('tr');
-        
+
         for (let diaDaSemana = 0; diaDaSemana < 7; diaDaSemana++) {
           const cell = document.createElement('td');
-          
+
           // Primeira semana - células vazias antes do primeiro dia
           if (semanaAtual === 0 && diaDaSemana < diaDaSemanaInicial) {
             cell.classList.add('empty');
@@ -1102,57 +1242,64 @@ const FolgasEditor = (() => {
           else if (diaAtual <= diasNoMes) {
             const label = document.createElement('label');
             label.classList.add('day-checkbox');
-            
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.value = diaAtual; // Mantém como string inicialmente
-            checkbox.id = `day-${diaAtual}`;
-            
-            // Verifica se o dia já estava selecionado (para edição)
+            checkbox.value = diaAtual;
+            checkbox.id = 'day-' + diaAtual;
+
+            // AJUSTADO: Verificar se o dia está nas folgas existentes
             const diaNumero = parseInt(diaAtual);
-            checkbox.checked = state.folgasSelecionadas.has(diaNumero);
-            
+            const estaNoAppwrite = folgasExistentes.includes(diaNumero);
+            checkbox.checked = estaNoAppwrite;
+
+            // Se está marcado no Appwrite, adicionar ao estado
+            if (estaNoAppwrite) {
+              state.folgasSelecionadas.add(diaNumero);
+            }
+
             // Event listener para mudanças no checkbox
             checkbox.addEventListener('change', (event) => {
               const dia = parseInt(event.target.value);
-              
+
               if (event.target.checked) {
                 state.folgasSelecionadas.add(dia);
-                console.log(`Dia ${dia} adicionado. Folgas atuais:`, Array.from(state.folgasSelecionadas));
+                console.log('Dia ' + dia + ' adicionado. Folgas atuais:', Array.from(state.folgasSelecionadas));
               } else {
                 state.folgasSelecionadas.delete(dia);
-                console.log(`Dia ${dia} removido. Folgas atuais:`, Array.from(state.folgasSelecionadas));
+                console.log('Dia ' + dia + ' removido. Folgas atuais:', Array.from(state.folgasSelecionadas));
               }
             });
-  
+
             const labelText = document.createTextNode(diaAtual);
-            
+
             label.appendChild(checkbox);
             label.appendChild(labelText);
             cell.appendChild(label);
-            
+
             diaAtual++;
           }
           // Células vazias após o último dia
           else {
             cell.classList.add('empty');
           }
-          
+
           row.appendChild(cell);
         }
-        
+
         elements.editableCalendarBody.appendChild(row);
         semanaAtual++;
-        
+
         // Evita loop infinito
         if (semanaAtual > 6) break;
       }
-      
+
       console.log('Calendário editável criado para', mes, '/', ano);
-      
+      console.log('Folgas pré-selecionadas:', Array.from(state.folgasSelecionadas));
+
     } catch (error) {
       console.error('Erro ao criar calendário editável:', error);
-      alert(`Erro ao criar calendário: ${error.message}`);
+      alert('Erro ao criar calendário: ' + error.message);
     }
   }
 
@@ -1191,6 +1338,13 @@ const FolgasEditor = (() => {
     elements.nextBtn.addEventListener('click', handleNext);
     elements.backBtn.addEventListener('click', renderStep1);
     elements.saveBtn.addEventListener('click', saveSchedule);
+  
+    // NOVO: Adicionar listeners para atualizar o texto do link de exclusão
+    elements.monthSelect.addEventListener('change', updateDeleteLinkText);
+    elements.yearSelect.addEventListener('change', updateDeleteLinkText);
+    
+    elements.deleteLink.addEventListener('click', handleDeleteSchedule);
+
   }
 
   // Remove listeners para evitar duplicação
@@ -1200,6 +1354,13 @@ const FolgasEditor = (() => {
     elements.nextBtn.removeEventListener('click', handleNext);
     elements.backBtn.removeEventListener('click', renderStep1);
     elements.saveBtn.removeEventListener('click', saveSchedule);
+    
+    // NOVO: Remover listeners do texto do link de exclusão
+    elements.monthSelect.removeEventListener('change', updateDeleteLinkText);
+    elements.yearSelect.removeEventListener('change', updateDeleteLinkText);
+    
+    elements.deleteLink.removeEventListener('click', handleDeleteSchedule);
+
   }
 
   // Simulação de salvar a escala
@@ -1243,8 +1404,7 @@ const FolgasEditor = (() => {
   
     } catch (error) {
       console.error('Erro ao salvar escala:', error);
-      alert(`Erro ao salvar escala: ${error.message}`);
-      throw error;
+	  alert('Erro ao salvar escala: ' + error.message);      throw error;
     }
   }
   return {
