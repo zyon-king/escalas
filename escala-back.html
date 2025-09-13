@@ -951,7 +951,7 @@ function initAppwrite() {
       // Se Appwrite não está carregado, aguarda um pouco e tenta novamente
       setTimeout(() => {
         initAppwrite().then(resolve).catch(reject);
-      }, 500);
+      }, 1000);
     }
   });
 }
@@ -1074,7 +1074,15 @@ async function loadAvailableMonthsYears() {
     }
   } catch (error) {
     console.error('Erro ao carregar meses e anos disponíveis:', error);
-    alert('Erro ao carregar meses e anos. Veja console para mais detalhes.', error);
+    
+    // Fallback - criar opção padrão quando há erro de conexão
+    const monthSelect = document.getElementById('month-select');
+    monthSelect.innerHTML = '';
+    const option = new Option('Erro ao carregar - verifique conexão', '');
+    monthSelect.appendChild(option);
+    
+    // Não exibir alert para não interromper a experiência do usuário
+    console.warn('Falha na conexão com Appwrite. Verifique sua internet e configurações do projeto.');
   }
 }
 
