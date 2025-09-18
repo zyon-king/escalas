@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Lista de Folgas</title>
+    <style>
+        :root {
+            --dark-blue: #1a237e;
+            --wine: #5d021c;
+            --light-wine: #880e4f;
+            --text-color: #f0f0f0;
+            --border-color: #4a148c;
+        }
+
+        body {
+            background-color: var(--dark-blue);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--wine);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--light-wine);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #6a083a;
+        }
+
+        #peopleList, #generatedList {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        #peopleList li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        #peopleList input[type="radio"] {
+            margin-left: 10px;
+            width: auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .calendar-header select, .calendar-header input {
+            width: 48%;
+        }
+
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px 5px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .day span.day-number {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .day input[type="checkbox"] {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            margin: 0;
+            width: auto;
+        }
+
+        #generatedList li {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Organizador de Folgas</h1>
+        <input type="text" id="personName" placeholder="Nome (máx. 10 caracteres)" maxlength="10">
+        <button id="addPersonBtn">Adicionar Pessoa</button>
+        <h3>Pessoas Adicionadas</h3>
+        <ul id="peopleList">
+            </ul>
+    </div>
+
+    <div class="container">
+        <h3>Configuração de Data</h3>
+        <div class="calendar-header">
+            <select id="monthSelect">
+                </select>
+            <input type="number" id="yearInput" placeholder="Ano (ex: 2025)" min="2000" max="2100">
+        </div>
+        <div id="calendar">
+            </div>
+        <button id="generateListBtn">Gerar Lista</button>
+    </div>
+
+    <div class="container">
+        <h3>Lista de Folgas Gerada</h3>
+        <ul id="generatedList"></ul>
+        
+        <button id="copyListBtn">Copiar Lista</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const personNameInput = document.getElementById('personName');
+            const addPersonBtn = document.getElementById('addPersonBtn');
+            const peopleListUl = document.getElementById('peopleList');
+            const monthSelect = document.getElementById('monthSelect');
+            const yearInput = document.getElementById('yearInput');
+            const calendarDiv = document.getElementById('calendar');
+            const generateListBtn = document.getElementById('generateListBtn');
+            const generatedListUl = document.getElementById('generatedList');
+            
+            let people = [];
+            let selectedPersonId = null;
+            let selectedDaysByPerson = {};
+
+            const monthNames = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+            // --- Gerenciamento de Pessoas ---
+            
+            function renderPeopleList() {
+                peopleListUl.innerHTML = '';
+                people.forEach(person => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${person.name}</span>
+                        <input type="radio" name="selectedPerson" data-person-id="${person.id}">
+                    `;
+                    peopleListUl.appendChild(li);
+                });
+                
+                // Adiciona o listener para os radio buttons
+                peopleListUl.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        selectedPersonId = e.target.dataset.personId;
+                    });
+                });
+            }
+
+            addPersonBtn.addEventListener('click', () => {
+                const name = personNameInput.value.trim();
+                if (name && name.length <= 10) {
+                    const newPerson = { id: Date.now().toString(), name: name };
+                    people.push(newPerson);
+                    selectedDaysByPerson[newPerson.id] = [];
+                    renderPeopleList();
+                    personNameInput.value = '';
+                } else {
+                    alert('Por favor, insira um nome com no máximo 10 caracteres.');
+                }
+            });
+
+            // --- Gerenciamento do Calendário ---
+
+            function generateMonthSelect() {
+                monthNames.forEach((name, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = name;
+                    monthSelect.appendChild(option);
+                });
+            }
+
+            function renderCalendar() {
+                calendarDiv.innerHTML = '';
+                const selectedMonth = parseInt(monthSelect.value);
+                const selectedYear = parseInt(yearInput.value);
+
+                if (isNaN(selectedMonth) || isNaN(selectedYear)) {
+                    return;
+                }
+
+                // Limpa a lista de folgas anterior
+                generatedListUl.innerHTML = '';
+
+                const firstDayOfMonth = new Date(selectedYear, selectedMonth, 1);
+                const lastDayOfMonth = new Date(selectedYear, selectedMonth + 1, 0);
+                const numberOfDays = lastDayOfMonth.getDate();
+                const startDayOfWeek = firstDayOfMonth.getDay();
+
+                // Cabeçalho dos dias da semana
+                dayNames.forEach(dayName => {
+                    const dayLabel = document.createElement('div');
+                    dayLabel.textContent = dayName;
+                    dayLabel.style.fontWeight = 'bold';
+                    dayLabel.style.textAlign = 'center';
+                    calendarDiv.appendChild(dayLabel);
+                });
+
+                // Espaços vazios para alinhar o primeiro dia
+                for (let i = 0; i < startDayOfWeek; i++) {
+                    const emptyDiv = document.createElement('div');
+                    calendarDiv.appendChild(emptyDiv);
+                }
+
+                // Geração dos dias do mês
+                for (let i = 1; i <= numberOfDays; i++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('day');
+                    
+                    const dayNumberSpan = document.createElement('span');
+                    dayNumberSpan.classList.add('day-number');
+                    dayNumberSpan.textContent = i;
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.dataset.day = i;
+
+                    dayDiv.appendChild(dayNumberSpan);
+                    dayDiv.appendChild(checkbox);
+                    calendarDiv.appendChild(dayDiv);
+
+                    // Adiciona evento ao checkbox
+                    checkbox.addEventListener('change', (e) => {
+                        if (!selectedPersonId) {
+                            alert('Por favor, selecione uma pessoa antes de escolher os dias.');
+                            e.target.checked = false;
+                            return;
+                        }
+                        
+                        const day = parseInt(e.target.dataset.day);
+                        const daysArray = selectedDaysByPerson[selectedPersonId];
+                        
+                        if (e.target.checked) {
+                            if (!daysArray.includes(day)) {
+                                daysArray.push(day);
+                            }
+                        } else {
+                            const index = daysArray.indexOf(day);
+                            if (index > -1) {
+                                daysArray.splice(index, 1);
+                            }
+                        }
+                    });
+                }
+            }
+
+            monthSelect.addEventListener('change', renderCalendar);
+            yearInput.addEventListener('input', renderCalendar);
+            
+            // --- Geração da Lista Final ---
+
+            generateListBtn.addEventListener('click', () => {
+                const selectedMonth = parseInt(monthSelect.value);
+                const selectedYear = parseInt(yearInput.value);
+                if (isNaN(selectedMonth) || isNaN(selectedYear)) {
+                    alert('Por favor, selecione um mês e ano válidos.');
+                    return;
+                }
+
+                generatedListUl.innerHTML = '';
+
+                // Agrupa as pessoas por dia
+                const daysByPerson = {};
+                for (const personId in selectedDaysByPerson) {
+                    const person = people.find(p => p.id === personId);
+                    if (person) {
+                        selectedDaysByPerson[personId].forEach(day => {
+                            if (!daysByPerson[day]) {
+                                daysByPerson[day] = [];
+                            }
+                            daysByPerson[day].push(person.name);
+                        });
+                    }
+                }
+
+                if (Object.keys(daysByPerson).length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'Nenhuma folga selecionada.';
+                    generatedListUl.appendChild(li);
+                    return;
+                }
+
+                const headerLi = document.createElement('li');
+                headerLi.textContent = `${monthNames[selectedMonth]}/${selectedYear}`;
+                headerLi.style.fontWeight = 'bold';
+                headerLi.style.backgroundColor = 'var(--light-wine)';
+                generatedListUl.appendChild(headerLi);
+
+                // Ordena os dias para a exibição
+                const sortedDays = Object.keys(daysByPerson).map(Number).sort((a, b) => a - b);
+                
+                sortedDays.forEach(day => {
+                    const date = new Date(selectedYear, selectedMonth, day);
+                    const dayOfWeek = dayNames[date.getDay()];
+                    const peopleNames = daysByPerson[day].join(' | ');
+                    
+                    const li = document.createElement('li');
+                    li.textContent = `${peopleNames} ${dayOfWeek} ${day}`;
+                    generatedListUl.appendChild(li);
+                });
+            });
+            
+            // --- Funcionalidade de Copiar Lista ---
+            const copyListBtn = document.getElementById('copyListBtn');
+
+            copyListBtn.addEventListener('click', () => {
+                const listItems = Array.from(generatedListUl.children)
+                      .map(li => li.textContent)
+                      .join('\n');
+
+                if (listItems.trim() === 'Nenhuma folga selecionada.') {
+                    alert('A lista está vazia!');
+                    return;
+                }
+
+                navigator.clipboard.writeText(listItems)
+                    .then(() => {
+                        alert('Lista copiada para a área de transferência!');
+                    })
+                    .catch(err => {
+                        console.error('Erro ao copiar a lista: ', err);
+                        alert('Falha ao copiar a lista. O navegador pode ter bloqueado.');
+                    });
+            });
+
+            // --- Inicialização ---
+            const currentYear = new Date().getFullYear();
+            yearInput.value = currentYear;
+            generateMonthSelect();
+            monthSelect.value = new Date().getMonth();
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>
