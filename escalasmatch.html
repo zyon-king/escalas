@@ -153,6 +153,16 @@
         #notification-box.show {
             opacity: 1;
         }
+
+        #notification-box .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1; /* Alinha o "x" verticalmente */
+        }
     </style>
 </head>
 <body>
@@ -435,7 +445,6 @@
             });
 
             function showNotification(message) {
-                // Remove qualquer notificação existente para evitar sobreposição
                 const existingNotification = document.getElementById('notification-box');
                 if (existingNotification) {
                     existingNotification.remove();
@@ -444,17 +453,24 @@
                 const notificationBox = document.createElement('div');
                 notificationBox.id = 'notification-box';
                 notificationBox.textContent = message;
+            
+                // Cria e adiciona o botão de fechar
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'close-btn';
+                closeBtn.innerHTML = '&times;'; // Usa o caractere 'x'
+                notificationBox.appendChild(closeBtn);
+            
                 document.body.appendChild(notificationBox);
             
                 // Força o navegador a aplicar o estilo inicial antes de adicionar a classe "show"
                 getComputedStyle(notificationBox).opacity;
                 notificationBox.classList.add('show');
-            
-                // Remove a notificação após 3 segundos
-                setTimeout(() => {
+                       
+                // Adiciona o evento de clique ao botão de fechar
+                closeBtn.addEventListener('click', () => {
+                     // Limpa o temporizador para evitar que a notificação se feche sozinha
                     notificationBox.classList.remove('show');
-                    setTimeout(() => notificationBox.remove(), 500); // Remove o elemento após a transição
-                }, 3000);
+                });
             }
 
             // --- Inicialização ---
