@@ -229,6 +229,16 @@
 
             addPersonBtn.addEventListener('click', () => {
                 const name = personNameInput.value.trim();
+
+                // Verifica se já existe uma pessoa com esse nome
+                const nameExists = people.some(person => person.name.toLowerCase() === name.toLowerCase());
+                
+                if (nameExists) {
+                    alert('Este nome já foi adicionado. Por favor, use um nome diferente.');
+                    personNameInput.value = '';
+                    return; // Impede que o restante do código seja executado
+                }
+                
                 if (name && name.length <= 10) {
                     const newPerson = { id: Date.now().toString(), name: name };
                     people.push(newPerson);
