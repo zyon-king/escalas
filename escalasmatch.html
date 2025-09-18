@@ -208,6 +208,21 @@
                 peopleListUl.querySelectorAll('input[type="radio"]').forEach(radio => {
                     radio.addEventListener('change', (e) => {
                         selectedPersonId = e.target.dataset.personId;
+
+                        // 1. Limpa todos os checkboxes no calendário
+                        const allCheckboxes = calendarDiv.querySelectorAll('input[type="checkbox"]');
+                        allCheckboxes.forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+                
+                        // 2. Marca os dias da pessoa recém-selecionada
+                        const daysForNewPerson = selectedDaysByPerson[selectedPersonId] || [];
+                        daysForNewPerson.forEach(day => {
+                            const checkbox = calendarDiv.querySelector(`[data-day="${day}"]`);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                            }
+                        });
                     });
                 });
             }
