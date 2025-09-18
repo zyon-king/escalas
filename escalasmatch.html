@@ -133,6 +133,26 @@
             border-radius: 6px;
             margin-bottom: 8px;
         }
+        
+        /* --- */
+        #notification-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--light-wine);
+            color: var(--text-color);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 1000;
+        }
+        
+        #notification-box.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -234,7 +254,7 @@
                 const nameExists = people.some(person => person.name.toLowerCase() === name.toLowerCase());
                 
                 if (nameExists) {
-                    alert('Este nome já foi adicionado. Por favor, use um nome diferente.');
+                    showNotification('Este nome já foi adicionado. Por favor, use um nome diferente.');
                     personNameInput.value = '';
                     return; // Impede que o restante do código seja executado
                 }
@@ -246,7 +266,7 @@
                     renderPeopleList();
                     personNameInput.value = '';
                 } else {
-                    alert('Por favor, insira um nome com no máximo 10 caracteres.');
+                    showNotification('Por favor, insira um nome com no máximo 10 caracteres.');
                 }
             });
 
@@ -313,7 +333,7 @@
                     // Adiciona evento ao checkbox
                     checkbox.addEventListener('change', (e) => {
                         if (!selectedPersonId) {
-                            alert('Por favor, selecione uma pessoa antes de escolher os dias.');
+                            showNotification('Por favor, selecione uma pessoa antes de escolher os dias.');
                             e.target.checked = false;
                             return;
                         }
@@ -344,7 +364,7 @@
                 const selectedMonth = parseInt(monthSelect.value);
                 const selectedYear = parseInt(yearInput.value);
                 if (isNaN(selectedMonth) || isNaN(selectedYear)) {
-                    alert('Por favor, selecione um mês e ano válidos.');
+                    showNotification('Por favor, selecione um mês e ano válidos.');
                     return;
                 }
 
@@ -400,19 +420,42 @@
                       .join('\n');
 
                 if (listItems.trim() === 'Nenhuma folga selecionada.') {
-                    alert('A lista está vazia!');
+                    showNotification('A lista está vazia!');
                     return;
                 }
 
                 navigator.clipboard.writeText(listItems)
                     .then(() => {
-                        alert('Lista copiada para a área de transferência!');
+                        showNotification('Lista copiada para a área de transferência!');
                     })
                     .catch(err => {
                         console.error('Erro ao copiar a lista: ', err);
-                        alert('Falha ao copiar a lista. O navegador pode ter bloqueado.');
+                        showNotification('Falha ao copiar a lista. O navegador pode ter bloqueado.');
                     });
             });
+
+            function showNotification(message) {
+                // Remove qualquer notificação existente para evitar sobreposição
+                const existingNotification = document.getElementById('notification-box');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+            
+                const notificationBox = document.createElement('div');
+                notificationBox.id = 'notification-box';
+                notificationBox.textContent = message;
+                document.body.appendChild(notificationBox);
+            
+                // Força o navegador a aplicar o estilo inicial antes de adicionar a classe "show"
+                getComputedStyle(notificationBox).opacity;
+                notificationBox.classList.add('show');
+            
+                // Remove a notificação após 3 segundos
+                setTimeout(() => {
+                    notificationBox.classList.remove('show');
+                    setTimeout(() => notificationBox.remove(), 500); // Remove o elemento após a transição
+                }, 3000);
+            }
 
             // --- Inicialização ---
             const currentYear = new Date().getFullYear();
